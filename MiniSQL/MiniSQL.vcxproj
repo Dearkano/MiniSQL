@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -76,6 +76,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -115,6 +116,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BufferManager.cpp" />
+    <ClCompile Include="column.cpp" />
+    <ClCompile Include="database.cpp" />
+    <ClCompile Include="catalog_manager.cpp" />
+    <ClCompile Include="record_manager.cpp" />
+    <ClCompile Include="row.cpp" />
+    <ClCompile Include="table.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BufferManager.hpp" />
+    <ClInclude Include="catalog_manager.h" />
+    <ClInclude Include="column.h" />
+    <ClInclude Include="database.h" />
+    <ClInclude Include="m_string.h" />
+    <ClInclude Include="record_manager.h" />
+    <ClInclude Include="row.h" />
+    <ClInclude Include="table.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -14,4 +14,53 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="table.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="column.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="database.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="catalog_manager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="row.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="record_manager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BufferManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="table.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="column.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="database.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="row.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="record_manager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="catalog_manager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="m_string.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferManager.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>
