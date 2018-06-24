@@ -33,7 +33,7 @@
     <ClCompile Include="record_manager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="BufferManager.cpp">
+    <ClCompile Include="real_buffer_manager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -59,7 +59,7 @@
     <ClInclude Include="m_string.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="BufferManager.hpp">
+    <ClInclude Include="real_buffer_manager.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

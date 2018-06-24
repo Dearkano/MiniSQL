@@ -116,20 +116,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BufferManager.cpp" />
     <ClCompile Include="column.cpp" />
     <ClCompile Include="database.cpp" />
     <ClCompile Include="catalog_manager.cpp" />
+    <ClCompile Include="real_buffer_manager.cpp" />
     <ClCompile Include="record_manager.cpp" />
     <ClCompile Include="row.cpp" />
     <ClCompile Include="table.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BufferManager.hpp" />
     <ClInclude Include="catalog_manager.h" />
     <ClInclude Include="column.h" />
     <ClInclude Include="database.h" />
     <ClInclude Include="m_string.h" />
+    <ClInclude Include="real_buffer_manager.h" />
     <ClInclude Include="record_manager.h" />
     <ClInclude Include="row.h" />
     <ClInclude Include="table.h" />

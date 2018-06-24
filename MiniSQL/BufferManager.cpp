@@ -17,26 +17,245 @@ struct fileInfo
     int recordLength; //记录长度
     FileInfo *next;   //指向下一个文件的指针
     BlockInfo *first; //文件指向的第一个块
+    int row;          //文件行数
+    int col;          //文件列数
 };
 
-struct blockInfo
+struct blockInfo //一个block 存一条记录 每个字段256Byte, 最多存15个字段
 {
-    int blockNum;    // the block number of theblock,which indicate it when it be newed
+    int blockNum;    // the block number of the block,which indicate it when it be newed
     bool dirtyBit;   // 0 -> flase， 1 -> indicate dirty, write back
-    BlockInfo *next; //the pointer point to next block
+    BlockInfo *next; // the pointer point to next block
     FileInfo *file;  // the pointer point to the file, which the block belongs to
-    int charNum;     // the number of chars in theblock
+    int charNum;     // the number of chars in the block
     char *cBlock;    // the array space for storingthe records in the block in buffer
     int iTime;       // it indicate the ageof the block in use
     int lock;        // prevent the blockfrom replacing
 };
 
+struct m_string
+{
+  public:
+    static const int str_size = 256;
+    char str[str_size];
+
+  public:
+    m_string() = default;
+
+    m_string(const m_string &) = default;
+
+    m_string &operator=(const m_string &) = default;
+
+    m_string &operator=(const std::string &std_str)
+    {
+        memcpy(str, std_str.c_str(), std_str.size());
+        return *this;
+    }
+
+    m_string &operator=(const char *c_str)
+    {
+        memcpy(str, c_str, strlen(c_str));
+        return *this;
+    }
+
+    bool operator!=(const m_string &obj)
+    {
+        return strcmp(this->str, obj.str) != 0;
+    }
+
+    bool operator==(const m_string &obj)
+    {
+        return strcmp(this->str, obj.str) == 0;
+    }
+
+    bool operator>(const m_string &obj)
+    {
+        return strcmp(this->str, obj.str) > 0;
+    }
+
+    bool operator<(const m_string &obj)
+    {
+        return strcmp(this->str, obj.str) < 0;
+    }
+
+    bool operator>=(const m_string &obj)
+    {
+        return strcmp(this->str, obj.str) >= 0;
+    }
+
+    bool operator<=(const m_string &obj)
+    {
+        return strcmp(this->str, obj.str) <= 0;
+    }
+
+    friend std::ostream &operator<<(std::ostream &out, const m_string &obj)
+    {
+        out << obj.str;
+        return out;
+    }
+
+    friend std::istream &operator>>(std::istream &in, m_string &obj)
+    {
+        in >> obj.str;
+        return in;
+    }
+
+    ~m_string() = default;
+};
+//
+Str **BufferManager::read(string tableName)
+{
+    FileInfo *fTemp = get_file_info("DBNAME", tableName, 0);
+    BlockInfo *bTemp = fTemp->first;
+    int row = fTemp->row;
+    int col = fTemp->col;
+    //定义一个三维字符串数组
+    Str **re = new Str *[row];
+    int i = 0;
+    for (i = 0; i < row; i++)
+    {
+        re[i] = new Str[col];
+    }
+    int j = 0;
+    char *p = bTemp->cBlock;
+    for (i = 0; i < fTemp->row; i++)
+    {
+        for (j = 0; j < fTemp->col; j++)
+        {
+            strncpy(re[i][j].str, p, 256);
+            p += 256;
+        }
+        bTemp = bTemp->next;
+        if (bTemp == NULL)
+        {
+            return re;
+        }
+        return re;
+    }
+    return re;
+}
+
+int update(string tableName, Str **newData, int row, int col)
+{
+    FileInfo *fTemp = get_file_info("DBNAME", tableName, 0);
+    if (fTemp == NULL)
+        return 0;
+    fTemp->row = row;
+    fTemp->col = col;
+    int i;
+    int j;
+    BlockInfo *bTemp = fTemp->first;
+    if (bTemp == NULL)
+    {
+        fTemp->first = findBlock("DB_Name");
+        if (fTemp->first == NULL)
+        {
+            return -1;
+        }
+    }
+    bTemp = fTemp->first;
+    char *p;
+    for (i = 0; i < row; i++)
+    {
+        p = bTemp->cBlock;
+        for (j = 0; j < col; j++)
+        {
+            strncpy(p, newData[i][j].str, 256);
+            p += 256;
+        }
+        if (bTemp->next == NULL && i != row - 1)
+        {
+            bTemp->next = findBlock("DB_Name");
+            if (bTemp->next == NULL)
+            {
+                return -1;
+            }
+        }
+        bTemp = bTemp->next;
+    }
+    //如果更新完成后面仍有多余的块节点（删除了数据），把块从文件节点下移除
+    BlockInfo *temp;
+    if (bTemp != NULL)
+    {
+        temp = bTemp;
+        bTemp = bTemp->next;
+        temp->next == NULL;
+    }
+    return 1;
+}
+
+char *BufferManager::getpage(string tableName, int BlockId)
+{
+    FileInfo *fTemp = get_file_info("DBNAME", tableName, 0);
+    if (fTemp == NULL)
+    {
+        return NULL;
+    }
+    BlockInfo *bTemp = fTemp->first;
+    int mark = 0;
+    char *re = NULL;
+    while (bTemp != NULL)
+    {
+        if (bTemp->blockNum == BlockId)
+        {
+            re = (char *)malloc(bTemp->charNum + 1);
+            strncpy(re, bTemp->cBlock, bTemp->charNum);
+            mark = 1;
+            break;
+        }
+        bTemp = bTemp->next;
+    }
+    if (mark == 1)
+    {
+        return re;
+    }
+}
+
+int BufferManager::modifypage(string tableName, int BlockId, char *newData)
+{
+    FileInfo *fTemp = get_file_info("DBNAME", tableName, 0);
+    if (fTemp == NULL)
+    {
+        return 0;
+    }
+    BlockInfo *bTemp = fTemp->first;
+    while (bTemp != NULL)
+    {
+        if (bTemp->blockNum == BlockId)
+        {
+            bTemp->charNum = strlen(newData);
+            strncpy(bTemp->cBlock, newData, bTemp->charNum);
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int BufferManager::createDB(string DBName)
+{
+    DB = (FileInfo *)malloc(sizeof(struct fileInfo));
+    DB->fileName = "DBNAME";
+    DB->next == NULL;
+    return 1;
+}
+
+int BufferManager::createNewTable(string tableName)
+{
+    FileInfo *fTemp = (FileInfo *)malloc(sizeof(struct fileInfo));
+    DB->next = fTemp;
+    fTemp->col = 0;
+    fTemp->row = 0;
+    fTemp->first = NULL;
+    fTemp->type = 0;
+    return 1;
+}
+
 //返回一个数据库的起始地址
 FileInfo *findFileInfo(string DB_Name)
 {
-    if (head_of_files == NULL) //数据库的地址
+    if (DB == NULL) //数据库的地址
         return NULL;
-    return head_of_files->next;
+    return DB->next;
 }
 
 FileInfo *get_file_info(const string DB_Name, const string fileName, const int m_fileType)
@@ -125,7 +344,7 @@ BlockInfo *findBlock(string DB_Name)
                 blockInfo *block_last = remove_block_inbuffer(block_temp); //从链表中移除
                                                                            //更新freeNum
                 string freeNum_rec(block_temp->cBlock);
-                ptr->freeNum = stoi(freeNum_rec.Left(3));
+                ptr->freeNum = stoi(freeNum_rec.substr(0, 3));
                 return block_temp;
             }
             //file记录了freeNUM 但是找不到这个block

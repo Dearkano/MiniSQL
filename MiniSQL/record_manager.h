@@ -21,14 +21,14 @@ public:
 	=>
 	select("table1",["id","name"],2)
 	*/
-	table* select(m_string tableName, m_string *columns,int columnNum, m_string column , m_string value, char opt = ' ') ;
+	table* select(m_string tableName, m_string *columns=&m_string("*"),int columnNum=1, m_string column=m_string("") , m_string value=m_string(""), char opt = ' ') ;
 
 	/*
 	  insert (id,name,major,gpa) vailues("001","andy","computer","3") into table1
 	  =>
 	  add("table1",["001","andy","computer","3"]);
 	*/
-	int add(m_string tableName, char **data);
+	int add(m_string tableName, m_string *data);
 	/*
 	  delete from table1 where id=1
 	  =>

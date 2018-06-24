@@ -3,6 +3,7 @@
 #include"column.h"
 #include"record_manager.h"
 #include"catalog_manager.h"
+#include"real_buffer_manager.h"
 #include<iostream>
 #include<fstream>
 #include<sstream>
@@ -45,6 +46,7 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 
 	database *db = this->dict.db;
 	table *tb = new table();
+	real_buffer_manager r;
 	int rs = 0;
 	for (int i = 0; i < db->tableNum; i++) {
 		if (tableName == db->tables[i].table_name) {
@@ -58,9 +60,10 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 
 	//申请buffer manager将这个表读入内存成为char [][][]形式
 	//char ***data = buffer_manager.read(tableName);
-	char ***data = initData();
+
+	m_string ** data = r.read_table(tb->table_name, tb->row_num, tb->column_num);
 	int t = 0;
-	char ***newData;
+	m_string **newData;
 	//检查约束条件
 	if (opt != ' ') {
 		int r = 0, c = 0, isInt = 0, isFloat = 0;;
@@ -74,17 +77,17 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 				break;
 			}
 		}
-		newData = new char**[tb->row_num];
+		newData = new m_string*[tb->row_num];
 		for (int i = 0; i < tb->row_num; i++) {
-
+			newData[i] = new m_string[tb->column_num];
 			string s;
 			stringstream ss;
 			int n, v;
 			float f;
 			switch (opt) {
 			case '=':
-				if (isInt||isFloat) {
-					s = data[i][c];
+				if (isInt || isFloat) {
+					s = data[i][c].str;
 					ss << s;
 					if (isInt == 1)
 						ss >> n;
@@ -95,17 +98,18 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 					ss >> v;
 					if (isInt&&n == v) {
 						newData[r++] = data[i];
-					} else if (isFloat&&f == v) {
+					}
+					else if (isFloat&&f == v) {
 						newData[r++] = data[i];
 					}
 				}
 				else {
-					if (strcmp(value.str, data[i][c]) == 0)
+					if (strcmp(value.str, data[i][c].str) == 0)
 						newData[r++] = data[i];
 				}
 				break;
 			case'>':
-				s = data[i][c];
+				s = data[i][c].str;
 				ss << s;
 				if (isInt == 1)
 					ss >> n;
@@ -114,7 +118,7 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 				ss.clear();
 				ss << value;
 				ss >> v;
-				
+
 				if (isInt&&n > v) {
 					newData[r++] = data[i];
 				}
@@ -123,7 +127,7 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 				}
 				break;
 			case'<':
-				s = data[i][c];
+				s = data[i][c].str;
 				ss << s;
 				if (isInt == 1)
 					ss >> n;
@@ -140,7 +144,7 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 				}
 				break;
 			case'g':
-				s = data[i][c];
+				s = data[i][c].str;
 				ss << s;
 				if (isInt == 1)
 					ss >> n;
@@ -157,7 +161,7 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 				}
 				break;
 			case'l':
-				s = data[i][c];
+				s = data[i][c].str;
 				ss << s;
 				if (isInt == 1)
 					ss >> n;
@@ -174,9 +178,9 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 				}
 				break;
 			case'!':
-				if (isInt||isFloat) {
+				if (isInt || isFloat) {
 					int n, v;
-					s = data[i][c];
+					s = data[i][c].str;
 					ss << s;
 					if (isInt == 1)
 						ss >> n;
@@ -193,7 +197,7 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 					}
 				}
 				else {
-					if (strcmp(value.str, data[i][c]) != 0)
+					if (strcmp(value.str, data[i][c].str) != 0)
 						newData[r++] = data[i];
 				}
 				break;
@@ -234,10 +238,11 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 
 }
 
-int record_manager::add(m_string tableName, char ** newRow)
+int record_manager::add(m_string tableName, m_string* newRow)
 {
 	database *db = this->dict.db;
 	table *tb = new table();
+	real_buffer_manager r;
 	int rs = 0;
 	int t;
 	for (int i = 0; i < db->tableNum; i++) {
@@ -249,21 +254,22 @@ int record_manager::add(m_string tableName, char ** newRow)
 		}
 	}
 
-	char ***data = initData();
+	m_string **originData = r.read_table(tb->table_name, tb->row_num, tb->column_num);
+	originData[tb->row_num] = new m_string[tb->column_num];
 	//if(rs==0)throw error
-	int r = tb->row_num;
+	int rnum = tb->row_num;
 	for (int i = 0; i < tb->column_num; i++) {
-		data[r][i] = newRow[i];
+		strcpy(originData[rnum][i].str, newRow[i].str);
 	}
+
+
+	//申请buffer manager将表更改后的内容存入硬盘
+	int result = r.update_table(tb->table_name, originData, tb->row_num + 1, tb->column_num);
+
 
 	//更新数据字典的行数
 	this->dict.db->tables[t].row_num++;
 	this->dict.update_database();
-
-	//申请buffer manager将表更改后的内容存入硬盘
-	//将table重新变成char newData[][][]类型
-	//int result = buffer_manager.update(tableName,newData);
-
 	return 0;
 }
 
@@ -309,7 +315,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 		float f;
 		switch (opt) {
 		case '=':
-			if (isInt||isFloat) {
+			if (isInt || isFloat) {
 				s = data[i][c];
 				ss << s;
 				if (isInt == 1)
@@ -324,7 +330,8 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
 					}
-				}else if (isFloat&&f == v) {
+				}
+				else if (isFloat&&f == v) {
 					tb->row_num--;
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
@@ -433,7 +440,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 			}
 			break;
 		case'!':
-			if (isInt||isFloat) {
+			if (isInt || isFloat) {
 				int n, v;
 				s = data[i][c];
 				ss << s;
@@ -520,7 +527,7 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 		/*
 		检查约束列
 		*/
-		int r = 0, c = 0, isInt = 0,isFloat=0;
+		int r = 0, c = 0, isInt = 0, isFloat = 0;
 		for (int i = 0; i < tb->column_num; i++) {
 			if (column2 == tb->columns[i].column_name) {
 				c = i;
@@ -539,7 +546,7 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 			float f;
 			switch (opt) {
 			case '=':
-				if (isInt||isFloat) {
+				if (isInt || isFloat) {
 					s = data[i][c];
 					ss << s;
 					if (isInt == 1)
@@ -631,7 +638,7 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 				}
 				break;
 			case'!':
-				if (isInt||isFloat) {
+				if (isInt || isFloat) {
 					int n, v;
 					s = data[i][c];
 					ss << s;
@@ -664,7 +671,15 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 	/*
 	data是新的文件
 	更新数据词典*/
-
+	m_string **d = new m_string*[tb->row_num];
+	for (int i = 0; i < tb->row_num; i++) {
+		d[i] = new m_string[tb->column_num];
+		for (int j = 0; j < tb->column_num; j++) {
+			strcpy(d[i][j].str, data[i][j]);
+		}
+	}
+	real_buffer_manager r;
+	r.update_table(tb->table_name, d, tb->row_num, tb->column_num);
 	return 0;
 }
 
@@ -677,18 +692,20 @@ record_manager::record_manager()
 }
 
 int main() {
-
+	real_buffer_manager b;
+	m_string str("table2");
+	//b.create_dbFile(str);
+	m_string s1("0004");
+	m_string s2("cindy");
+	m_string s3("computer science");
+	m_string s4("4.0");
+	m_string tbName("table2");
+	m_string *s = new m_string[4]{ s1,s2,s3,s4 };
 	record_manager rm;
+	rm.add(tbName, s);
 	m_string tableName;
 	strcpy(tableName.str, "table2");
-	m_string s1;
-	strcpy(s1.str, "gpa");
-	m_string s2;
-	strcpy(s2.str, "4.0");
-	m_string opt[2];
-	strcpy(opt[0].str, "name");
-	strcpy(opt[1].str, "major");
-	table *tb = rm.select(tableName, opt, 2, s1, s2, 'g');
+	table *tb = rm.select(tableName);
 	for (int i = 0; i < tb->row_num; i++) {
 		for (int j = 0; j < tb->column_num; j++) {
 			cout << tb->rows[i]->data[j] << " ";
