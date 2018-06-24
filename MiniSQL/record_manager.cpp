@@ -290,8 +290,8 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 
 	// if(rs==0) throw error;
 
-
-	char ***data = initData();
+	real_buffer_manager b;
+	m_string **data = b.read_table(tb->table_name,tb->row_num,tb->column_num);
 
 	/*
 		检查约束列
@@ -309,14 +309,14 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 	}
 	//遍历搜索
 	for (int i = 0; i < tb->row_num; i++) {
-		string s;
+		m_string s;
 		stringstream ss;
 		int n, v;
 		float f;
 		switch (opt) {
 		case '=':
 			if (isInt || isFloat) {
-				s = data[i][c];
+				s = data[i][c].str;
 				ss << s;
 				if (isInt == 1)
 					ss >> n;
@@ -339,7 +339,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 				}
 			}
 			else {
-				if (strcmp(value.str, data[i][c]) == 0) {
+				if (strcmp(value.str, data[i][c].str) == 0) {
 					tb->row_num--;
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
@@ -348,7 +348,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 			}
 			break;
 		case'>':
-			s = data[i][c];
+			s = data[i][c].str;
 			ss << s;
 			if (isInt == 1)
 				ss >> n;
@@ -465,7 +465,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 				}
 			}
 			else {
-				if (strcmp(value.str, data[i][c]) != 0) {
+				if (strcmp(value.str, data[i][c].str) != 0) {
 					tb->row_num--;
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
@@ -475,7 +475,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 			break;
 		}
 	}
-
+	b.update_table(tb->table_name, data, tb->row_num, tb->column_num);
 	/*
 	data是新的文件
 	更新数据词典
@@ -494,6 +494,7 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 {
 	database *db = this->dict.db;
 	table *tb = new table();
+	real_buffer_manager b1;
 	int rs = 0;
 	int t;
 	for (int i = 0; i < db->tableNum; i++) {
@@ -507,7 +508,7 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 
 	// if(rs==0) throw error;
 
-	char ***data = initData();
+	m_string ** data= b1.read_table(tb->table_name,tb->row_num,tb->column_num);
 	/*
 	检查更新列
 	*/
@@ -520,7 +521,7 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 	}
 	if (opt == ' ') {
 		for (int i = 0; i < tb->row_num; i++) {
-			strcpy(data[i][t1], value1.str);
+			strcpy(data[i][t1].str, value1.str);
 		}
 	}
 	else {
@@ -540,7 +541,7 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 		}
 		//遍历搜索
 		for (int i = 0; i < tb->row_num; i++) {
-			string s;
+			m_string s;
 			stringstream ss;
 			int n, v;
 			float f;
@@ -557,15 +558,15 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 					ss << value2;
 					ss >> v;
 					if (isInt&&n == v) {
-						strcpy(data[i][t1], value1.str);
+						strcpy(data[i][t1].str, value1.str);
 					}
 					else if (isFloat&&f == v) {
-						strcpy(data[i][t1], value1.str);
+						strcpy(data[i][t1].str, value1.str);
 					}
 				}
 				else {
-					if (strcmp(value2.str, data[i][c]) == 0) {
-						strcpy(data[i][t1], value1.str);
+					if (strcmp(value2.str, data[i][c].str) == 0) {
+						strcpy(data[i][t1].str, value1.str);
 					}
 				}
 				break;
@@ -580,10 +581,10 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 				ss << value2;
 				ss >> v;
 				if (isInt&&n > v) {
-					strcpy(data[i][t1], value1.str);
+					strcpy(data[i][t1].str, value1.str);
 				}
 				else if (isFloat&&f > v) {
-					strcpy(data[i][t1], value1.str);
+					strcpy(data[i][t1].str, value1.str);
 				}
 				break;
 			case'<':
@@ -597,10 +598,10 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 				ss << value2;
 				ss >> v;
 				if (isInt&&n < v) {
-					strcpy(data[i][t1], value1.str);
+					strcpy(data[i][t1].str, value1.str);
 				}
 				else if (isFloat&&f < v) {
-					strcpy(data[i][t1], value1.str);
+					strcpy(data[i][t1].str, value1.str);
 				}
 				break;
 			case'g':
@@ -614,10 +615,10 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 				ss << value2;
 				ss >> v;
 				if (isInt&&n >= v) {
-					strcpy(data[i][t1], value1.str);
+					strcpy(data[i][t1].str, value1.str);
 				}
 				else if (isFloat&&f >= v) {
-					strcpy(data[i][t1], value1.str);
+					strcpy(data[i][t1].str, value1.str);
 				}
 				break;
 			case'l':
@@ -631,10 +632,10 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 				ss << value2;
 				ss >> v;
 				if (isInt&&n <= v) {
-					strcpy(data[i][t1], value1.str);
+					strcpy(data[i][t1].str, value1.str);
 				}
 				else if (isFloat&&f <= v) {
-					strcpy(data[i][t1], value1.str);
+					strcpy(data[i][t1].str, value1.str);
 				}
 				break;
 			case'!':
@@ -650,15 +651,15 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 					ss << value2;
 					ss >> v;
 					if (isInt&&n != v) {
-						strcpy(data[i][t1], value1.str);
+						strcpy(data[i][t1].str, value1.str);
 					}
 					else if (isFloat&&f != v) {
-						strcpy(data[i][t1], value1.str);
+						strcpy(data[i][t1].str, value1.str);
 					}
 				}
 				else {
-					if (strcmp(value2.str, data[i][c]) != 0) {
-						strcpy(data[i][t1], value1.str);
+					if (strcmp(value2.str, data[i][c].str) != 0) {
+						strcpy(data[i][t1].str, value1.str);
 					}
 				}
 				break;
@@ -675,7 +676,7 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 	for (int i = 0; i < tb->row_num; i++) {
 		d[i] = new m_string[tb->column_num];
 		for (int j = 0; j < tb->column_num; j++) {
-			strcpy(d[i][j].str, data[i][j]);
+			d[i][j]= data[i][j];
 		}
 	}
 	real_buffer_manager r;
@@ -696,13 +697,16 @@ int main() {
 	m_string str("table2");
 	//b.create_dbFile(str);
 	m_string s1("0004");
-	m_string s2("cindy");
+	m_string s2("andy");
 	m_string s3("computer science");
 	m_string s4("4.0");
+	m_string s5("cindy");
 	m_string tbName("table2");
+	m_string cl("name");
 	m_string *s = new m_string[4]{ s1,s2,s3,s4 };
 	record_manager rm;
-	rm.add(tbName, s);
+	//rm._delete(tbName, cl, s2, '=');
+	rm.update(tbName, cl, s5, cl, s2,'=');
 	m_string tableName;
 	strcpy(tableName.str, "table2");
 	table *tb = rm.select(tableName);
