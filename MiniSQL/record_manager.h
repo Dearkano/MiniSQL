@@ -33,6 +33,7 @@ public:
 	  delete from table1 where id=1
 	  =>
 	  _delete("table1","id",'=',"1");
+	  -1:表不存在 -2：列不存在
 	*/
 	int _delete(m_string tableName, m_string column , m_string value ,char opt = ' ');
 	/*

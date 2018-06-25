@@ -214,6 +214,8 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 		for (int i = 0; i < tb->row_num; i++) {
 			tb->rows[i] = new row(newData[i], tb->column_num);
 		}
+		free(data);
+
 		return tb;
 	}
 	// select id name
@@ -233,6 +235,8 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 			tb->rows[i] = new row(newData[i], tb->column_num, colId);
 		}
 		tb->column_num = columnNum;
+		free(data);
+		free(newData);
 		return tb;
 	}
 
@@ -258,6 +262,21 @@ int record_manager::add(m_string tableName, m_string* newRow)
 	originData[tb->row_num] = new m_string[tb->column_num];
 	//if(rs==0)throw error
 	int rnum = tb->row_num;
+	data_dictionary d;
+	for (int i = 0; i < rnum; i++) {
+		for (int j = 0; j < tb->column_num; j++) {
+			//主键或者唯一
+			if (d.is_unique_or_pk(tb->table_name, j)) {
+				if (newRow[j] == originData[i][j]) {
+
+					delete tb;
+					tb = NULL;
+					return 1;
+				}
+			}
+		}
+	}
+
 	for (int i = 0; i < tb->column_num; i++) {
 		strcpy(originData[rnum][i].str, newRow[i].str);
 	}
@@ -270,6 +289,8 @@ int record_manager::add(m_string tableName, m_string* newRow)
 	//更新数据字典的行数
 	this->dict.db->tables[t].row_num++;
 	this->dict.update_database();
+	delete tb;
+	tb = NULL;
 	return 0;
 }
 
@@ -277,6 +298,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 {
 	database *db = this->dict.db;
 	table *tb = new table();
+	int count = 0;
 	int rs = 0;
 	int t;
 	for (int i = 0; i < db->tableNum; i++) {
@@ -288,18 +310,20 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 		}
 	}
 
-	// if(rs==0) throw error;
+	if(rs==0) return -1;
 
 	real_buffer_manager b;
-	m_string **data = b.read_table(tb->table_name,tb->row_num,tb->column_num);
+	m_string **data = b.read_table(tb->table_name, tb->row_num, tb->column_num);
 
 	/*
 		检查约束列
 	*/
+	rs = 0;
 	int r = 0, c = 0, isInt = 0, isFloat = 0;
 	for (int i = 0; i < tb->column_num; i++) {
 		if (column == tb->columns[i].column_name) {
 			c = i;
+			rs = 1;
 			if (strcmp(tb->columns[i].data_type.str, "int") == 0)
 				isInt = 1;
 			if (strcmp(tb->columns[i].data_type.str, "float") == 0)
@@ -307,6 +331,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 			break;
 		}
 	}
+	if (rs == 0)return -2;
 	//遍历搜索
 	for (int i = 0; i < tb->row_num; i++) {
 		m_string s;
@@ -330,12 +355,16 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
 					}
+					i = 0;
+					count++;
 				}
 				else if (isFloat&&f == v) {
 					tb->row_num--;
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
 					}
+					i = 0;
+					count++;
 				}
 			}
 			else {
@@ -344,6 +373,8 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
 					}
+					i = 0;
+					count++;
 				}
 			}
 			break;
@@ -362,12 +393,16 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 				for (int j = i; j < tb->row_num; j++) {
 					data[j] = data[j + 1];
 				}
+				i = 0;
+				count++;
 			}
 			else if (isFloat&&f > v) {
 				tb->row_num--;
 				for (int j = i; j < tb->row_num; j++) {
 					data[j] = data[j + 1];
 				}
+				i = 0;
+				count++;
 			}
 			break;
 		case'<':
@@ -385,12 +420,16 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 				for (int j = i; j < tb->row_num; j++) {
 					data[j] = data[j + 1];
 				}
+				i = 0;
+				count++;
 			}
 			else if (isFloat&&f < v) {
 				tb->row_num--;
 				for (int j = i; j < tb->row_num; j++) {
 					data[j] = data[j + 1];
 				}
+				i = 0;
+				count++;
 			}
 			break;
 		case'g':
@@ -408,12 +447,16 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 				for (int j = i; j < tb->row_num; j++) {
 					data[j] = data[j + 1];
 				}
+				i = 0;
+				count++;
 			}
 			else if (isFloat&&f >= v) {
 				tb->row_num--;
 				for (int j = i; j < tb->row_num; j++) {
 					data[j] = data[j + 1];
 				}
+				i = 0;
+				count++;
 			}
 			break;
 		case'l':
@@ -431,12 +474,16 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 				for (int j = i; j < tb->row_num; j++) {
 					data[j] = data[j + 1];
 				}
+				i = 0;
+				count++;
 			}
 			else if (isFloat&&f <= v) {
 				tb->row_num--;
 				for (int j = i; j < tb->row_num; j++) {
 					data[j] = data[j + 1];
 				}
+				i = 0;
+				count++;
 			}
 			break;
 		case'!':
@@ -456,12 +503,16 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
 					}
+					i = 0;
+					count++;
 				}
 				else if (isFloat&&f != v) {
 					tb->row_num--;
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
 					}
+					i = 0;
+					count++;
 				}
 			}
 			else {
@@ -470,6 +521,8 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
 					}
+					i = 0;
+					count++;
 				}
 			}
 			break;
@@ -486,8 +539,10 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 	//申请buffer manager将表更改后的内容存入硬盘
 	//将table重新变成char newData[][][]类型
 	//int result = buffer_manager.update(tableName,newData);
-
-	return 0;
+	free(data);
+	delete tb;
+	tb = NULL;
+	return count;
 }
 
 int record_manager::update(m_string tableName, m_string column1, m_string value1, m_string column2, m_string value2, char opt)
@@ -508,7 +563,7 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 
 	// if(rs==0) throw error;
 
-	m_string ** data= b1.read_table(tb->table_name,tb->row_num,tb->column_num);
+	m_string ** data = b1.read_table(tb->table_name, tb->row_num, tb->column_num);
 	/*
 	检查更新列
 	*/
@@ -676,11 +731,15 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 	for (int i = 0; i < tb->row_num; i++) {
 		d[i] = new m_string[tb->column_num];
 		for (int j = 0; j < tb->column_num; j++) {
-			d[i][j]= data[i][j];
+			d[i][j] = data[i][j];
 		}
 	}
 	real_buffer_manager r;
 	r.update_table(tb->table_name, d, tb->row_num, tb->column_num);
+	free(d);
+	free(data);
+	delete tb;
+	tb = NULL;
 	return 0;
 }
 
@@ -697,14 +756,18 @@ int main() {
 	m_string str("table2");
 	//b.create_dbFile(str);
 	m_string s1("0004");
-	m_string s2("andy");
-	m_string s3("computer science");
-	m_string s4("4.0");
-	m_string s5("cindy");
+	m_string s2("asuka");
+	m_string s3("math");
+	m_string s4("2.7");
+	m_string s5("saito asuka");
 	m_string tbName("table2");
 	m_string cl("name");
 	m_string *s = new m_string[4]{ s1,s2,s3,s4 };
 	record_manager rm;
+	int rs = 0;
+	//for(int i=0;i<5;i++)
+	rs = rm.add(tbName, s);
+	if (rs == 1)cout << "添加失败 不唯一" << endl;
 	//rm._delete(tbName, cl, s2, '=');
 	rm.update(tbName, cl, s5, cl, s2,'=');
 	m_string tableName;
@@ -716,6 +779,7 @@ int main() {
 		}
 		cout << endl;
 	}
+	free(s);
 	system("pause");
 }
 
