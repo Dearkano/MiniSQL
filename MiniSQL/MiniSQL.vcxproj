@@ -125,6 +125,7 @@
     <ClCompile Include="record_manager.cpp" />
     <ClCompile Include="row.cpp" />
     <ClCompile Include="table.cpp" />
+    <ClCompile Include="api.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="catalog_manager.h" />
@@ -136,6 +137,7 @@
     <ClInclude Include="record_manager.h" />
     <ClInclude Include="row.h" />
     <ClInclude Include="table.h" />
+    <ClInclude Include="api.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

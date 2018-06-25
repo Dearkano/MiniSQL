@@ -58,6 +58,8 @@ string Input();
 
 void RemoveSpace(string& s,  const string mark = " ");
 
+void RemoveTabSpace(string &s);
+
 string Create(string sql);
 
 string Drop(string sql);
@@ -85,6 +87,9 @@ string DropIndex(string sql);
 vector<string> ValueSplit(string input);
 
 vector<condition> WhereSplit(string input);
+
+bool IsLegalInt(string a);
+bool IsLegalFloat(string a);
 
 
 # endif

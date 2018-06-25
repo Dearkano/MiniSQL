@@ -1,6 +1,7 @@
 #include "interpreter.h"
 #include "table.h"
 #include "record_manager.h"
+#include "api.h"
 
 
 bool isLegalName(string a)
@@ -10,7 +11,7 @@ bool isLegalName(string a)
 	{
 		return false;
 	}
-	string illgal = "{}[]/<>~`\"\\|:\?";
+	 // string illgal = "{}[]/<>~`\"\\|:\?";
 	string illgalForName = "{}[]/<>~`\"\\|:\';+-=!@#$%%^&*\? "; // 取名不能使用的字符
 	for (int i = 0; i < a.length(); i++)
 	{
@@ -22,6 +23,49 @@ bool isLegalName(string a)
 	return true;
 }
 
+bool IsLegalInt(string a)
+{
+	trim(a);
+	if (a == "")
+	{
+		return false;
+	}
+	for (int i = 0; i < a.length(); i++)
+	{
+		if (!(a[i] >= '0' && a[i] <= '9'))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+bool IsLegalFloat(string a)
+{
+	trim(a);
+	int count = 0;
+	if (a == "")
+	{
+		return false;
+	}
+	for (int i = 0; i < a.length(); i++)
+	{
+		if (!(a[i] >= '0' && a[i] <= '9') && (a[i] != '.'))
+		{
+			return false;
+		}
+		if (a[i] == '.')
+		{
+			count++;
+			if (count > 1)
+				return false;
+			if (i == 0)
+				return false;
+		}
+
+	}
+	return true;
+}
 
 
 
@@ -53,6 +97,30 @@ void RemoveSpace(string &s, const string mark)
 			return;
 		}
 
+		s.erase(pos, nSize);
+	}
+}
+
+void RemoveTabSpace(string &s)
+{
+	size_t nSize = 1;
+	while (1)
+	{
+		size_t pos = s.find(" ");    //  尤其是这里  
+		if (pos == string::npos)
+		{
+			return;
+		}
+
+		s.erase(pos, nSize);
+	}
+	while (1)
+	{
+		size_t pos = s.find("\t");    //  尤其是这里  
+		if (pos == string::npos)
+		{
+			return;
+		}
 		s.erase(pos, nSize);
 	}
 }
@@ -399,10 +467,22 @@ string CreateTable(string sql)
 	map<string, attrInfo>::iterator iter;
 	iter = newTable.attrList.begin();
 	while (iter != newTable.attrList.end()) {
-		cout << iter->first << " : " << iter->second.attrType << " " << iter->second.length<< endl;
+		cout << iter->first << " : " << iter->second.attrType << " " << iter->second.length<< " " << \
+			iter->second.resType << " " << iter->second.unique <<endl;
 		iter++;
 	}
-	sql = "80";
+	int result = create_table_api(newTable);
+	if (result == 1)
+	{
+		cerr << "数据库错误：表名冲突！" << endl;
+		sql = "99";
+		return sql;
+	}
+	else if (result == 0)
+	{
+		sql = "80";
+		return sql;
+	}
 	return sql;
 }
 // 传入的参数应当是形如 cool char(20) not unique;
@@ -670,10 +750,12 @@ string Delete(string sql)
 	}
 	sql = sql.substr(find + 4);
 	find = sql.find("where");
+	vector<condition> cod;
+	string tableName;
 	//有where的情况
 	if (find != string::npos)
 	{
-		string tableName = sql.substr(0, find);
+		tableName = sql.substr(0, find);
 		RemoveSpace(tableName, ";");
 		trim(tableName);
 		if (tableName.length() == 0)
@@ -688,7 +770,6 @@ string Delete(string sql)
 		}
 		// 获得表名并继续截取
 		sql = sql.substr(find + 5);
-		vector<condition> cod;
 		while (sql[sql.length() - 1] == ';')
 			sql.pop_back();
 		trim(sql);
@@ -704,11 +785,10 @@ string Delete(string sql)
 		{
 			cout << "condition: " << cod[i].attr << " " << cod[i].value << endl;
 		}
-		return "80";
 	}
 	else
 	{
-		string tableName = sql.substr(0, sql.length());
+		tableName = sql.substr(0, sql.length());
 		RemoveSpace(tableName, ";");
 		trim(tableName);
 		if (tableName.length() == 0)
@@ -721,10 +801,33 @@ string Delete(string sql)
 			cout << "语法错误：表名含有空格或非法字符" << endl;
 			return "99"; // 抛出错误代码，返回
 		}
-		vector<condition> cod;
 		cod.clear();
 		cout << "无条件" << endl;
+	}
+	if (cod.size() <= 1)
+	{
+		int result = delete_from_api(tableName, cod);
+		if (result == -1)
+		{
+			cerr << "delete错误：查无此表" << endl;
+			return "99";
+		}
+		else if (result == -2)
+		{
+			cerr << "delete错误:where条件提供的属性不存在" << endl;
+			return "99";
+		}
+		else if (result < 0)
+		{
+			// 其他错误
+			return "99";
+		}
 		return "80";
+	}
+	else
+	{
+		cout << "残念です！本数据库不支持多条件删除！" << endl;
+		return "99";
 	}
 }
 
@@ -784,12 +887,22 @@ string Insert(string sql)
 	{
 		return "99";
 	}
-	for (int i = 0; i < valueList.size(); i++)
+	try
 	{
-		cout << valueList[i] << endl;
+		int result = insert_into_api(valueList, tableName);
+		if (result == 0)
+		{
+			return "80";
+		}
+		else
+		{
+			return "99";
+		}
 	}
-	// 和接口弥合
-	return "80";
+	catch(...)
+	{
+		return "99";
+	}
 }
 
 
@@ -1034,7 +1147,7 @@ vector<condition> WhereSplit(string input)
 	vector<string> codList;
 	string stack1 = "";
 	string stack2 = "";
-	for (int i = 0; i < input.length() - 1; i++)
+	for (int i = 0; i < input.length(); i++)
 	{
 		if (input[i] == '\t') input[i] = ' ';
 		if (input[i] == '\'')
