@@ -690,6 +690,7 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 record_manager::record_manager()
 {
 }
+/*
 
 int main() {
 	real_buffer_manager b;
@@ -714,4 +715,4 @@ int main() {
 	}
 	system("pause");
 }
-
+*/
