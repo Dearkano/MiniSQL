@@ -1,1 +1,0 @@
-1 table2 4 5 0 id int 32 0 0 name varchar 32 0 0 major varchar 32 0 0 gpa float 32 0 0 

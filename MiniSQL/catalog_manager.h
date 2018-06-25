@@ -29,4 +29,7 @@ public:
 	int delete_index(m_string tableName, m_string indexName);
 	//打印所有的表定义
 	void listTable();
+	//返回是否是主键或者唯一
+	int is_unique_or_pk(m_string tableName, int colNum);
+
 };

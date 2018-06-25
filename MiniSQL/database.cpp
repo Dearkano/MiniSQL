@@ -8,47 +8,51 @@ using namespace std;
 database::database()
 {
 
-	ifstream inf;
-	inf.open("./data_dictionary.txt");
+	FILE *fp;
+	fp = fopen("./data_dictionary.dat", "rb");
 	int table_num;
-	inf >> table_num;
 	table *tables = (table*)malloc(10 * sizeof(table));
-	for (int i = 0; i < table_num; i++) {
-		m_string tableName, columnNumStr, rowNumStr,indexNumStr;
-		inf >> tableName;
-		inf >> columnNumStr;
-		inf >> rowNumStr;
-		inf >> indexNumStr;
-		int columnNum, rowNum,indexNum;
-		sscanf(columnNumStr.str, "%d", &columnNum);
-		sscanf(rowNumStr.str, "%d", &rowNum);
-		sscanf(indexNumStr.str, "%d", &indexNum);
-		column *columns = (column*)malloc(15 * sizeof(column));
-		m_string *indexNames = (m_string*)malloc(indexNum*sizeof(m_string));
-		for (int i = 0; i < indexNum; i++) {
-			m_string s;
-			inf >> s;
-			indexNames[i] = s;
-		}
-		for (int j = 0; j < columnNum; j++) {
-			m_string columnName, dataType, sizeStr;
-			int size = 0, unique, isPrimaryKey;
+	if (fp == NULL) {
+		fp = fopen("./data_dictionary.dat", "wb");
+		table_num = 0;
+		fwrite(&table_num, sizeof(int), 1, fp);
+	}
+	else {
+		fread(&table_num, sizeof(int), 1, fp);
+		for (int i = 0; i < table_num; i++) {
+			m_string tableName, columnNumStr, rowNumStr, indexNumStr;
+			int columnNum, rowNum, indexNum;
+			fread(tableName.str, sizeof(char), sizeof(m_string), fp);
+			fread(&columnNum, sizeof(int), 1, fp);
+			fread(&rowNum, sizeof(int), 1, fp);
+			fread(&indexNum, sizeof(int), 1, fp);
+			column *columns = (column*)malloc(columnNum * sizeof(column));
+			m_string *indexNames = (m_string*)malloc(indexNum * sizeof(m_string));
+			for (int i = 0; i < indexNum; i++) {
+				m_string s;
+				fread(s.str, sizeof(char), sizeof(m_string), fp);
+				indexNames[i] = s;
+			}
+			for (int j = 0; j < columnNum; j++) {
+				m_string columnName, dataType;
+				int size = 0, unique, isPrimaryKey;
 
-			inf >> columnName;
-			inf >> dataType;
-			inf >> sizeStr;
-			inf >> unique;
-			inf >> isPrimaryKey;		
-			sscanf(sizeStr.str, "%d", &size);
-			column *col = new column(columnName, dataType, size,unique, isPrimaryKey);
-			columns[j] = *col;
+				fread(columnName.str, sizeof(char), sizeof(m_string), fp);
+				fread(dataType.str, sizeof(char), sizeof(m_string), fp);
+				fread(&size, sizeof(int), 1, fp);
+				fread(&unique, sizeof(int), 1, fp);
+				fread(&isPrimaryKey, sizeof(int), 1, fp);
+				column *col = new column(columnName, dataType, size, unique, isPrimaryKey);
+				columns[j] = *col;
+			}
+			table *tb = new table(tableName, columnNum, rowNum, columns, indexNum, indexNames);
+			tables[i] = *tb;
 		}
-		 table *tb= new table(tableName, columnNum, rowNum, columns,indexNum,indexNames);
-		 tables[i] = *tb;
 	}
 	this->tables = tables;
+
 	this->tableNum = table_num;
-	inf.close();
+	fclose(fp);
 }
 
 

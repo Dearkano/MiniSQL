@@ -17,5 +17,6 @@ public:
 	m_string *index_names;
 	column *columns;
 	row *rows[];
+	int isError;
 };
 

@@ -236,6 +236,19 @@ void data_dictionary::listTable() {
 		cout << endl;
 	}
 }
+int data_dictionary::is_unique_or_pk(m_string tableName, int colNum)
+{
+	database *db = this->db;
+	for (int i = 0; i < db->tableNum; i++) {
+		if (db->tables[i].table_name == tableName) {
+			column col = db->tables[i].columns[colNum];
+			if (col.isPrimaryKey || col.unique)return 1;
+			return 0;
+		}
+	}
+
+	return 0;
+}
 void data_dictionary::update() {
 	delete this->db;
 	this->db = new database();
@@ -246,11 +259,11 @@ data_dictionary::data_dictionary() {
 
 void data_dictionary::update_database() {
 	database *db = this->db;
-	remove("./data_dictionary.txt");
-	ofstream outf;
+	remove("./data_dictionary.dat");
+	FILE *fp;
 	try {
-		outf.open("./data_dictionary.txt");
-		outf << db->tableNum << " ";
+		fp=fopen("./data_dictionary.dat","wb");
+		fwrite(&this->db->tableNum, sizeof(int), 1, fp);
 	}
 	catch (exception e) {
 		cout << "error" << endl;
@@ -259,37 +272,37 @@ void data_dictionary::update_database() {
 	for (int i = 0; i < db->tableNum; i++) {
 		table table = db->tables[i];
 		//写入表名
-		outf << table.table_name << " ";
+		fwrite(table.table_name.str, sizeof(char), sizeof(m_string), fp);
 
 		//写入列数 行数
-		outf << table.column_num << " " << table.row_num << " ";
-
+		fwrite(&table.column_num, sizeof(int), 1, fp);
+		fwrite(&table.row_num, sizeof(int), 1, fp);
 		//写入索引数，索引
-		outf << table.index_num << " ";
+		fwrite(&table.index_num, sizeof(int), 1, fp);
 		for (int i = 0; i < table.index_num; i++) {
-			outf << table.index_names[i] << " ";
+			fwrite(table.index_names[i].str, sizeof(char), sizeof(m_string), fp);
 		}
 		//写入列属性
 		for (int i = 0; i < table.column_num; i++) {
 
 			//写入列名
-			outf << table.columns[i].column_name << " ";
+			fwrite(table.columns[i].column_name.str, sizeof(char), sizeof(m_string), fp);
 
 			//写入数据类型
-			outf << table.columns[i].data_type << " ";
+			fwrite(table.columns[i].data_type.str, sizeof(char), sizeof(m_string), fp);
 
 			//写入数据长度
-			outf << table.columns[i].data_size << " ";
+			fwrite(&table.columns[i].data_size, sizeof(int), 1, fp);
 
 			//写入是否唯一
-			outf << table.columns[i].unique << " ";
+			fwrite(&table.columns[i].unique, sizeof(int), 1, fp);
 
 			//写入是否主键
-			outf << table.columns[i].isPrimaryKey << " ";
+			fwrite(&table.columns[i].isPrimaryKey, sizeof(int), 1, fp);
 
 		}
 	}
-	outf.close();
+	fclose(fp);
 }
 
 table build_table_demo(m_string tbName) {
