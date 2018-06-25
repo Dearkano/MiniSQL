@@ -20,6 +20,8 @@ public:
 	select (id,name) from table1 
 	=>
 	select("table1",["id","name"],2)
+
+	return table.isError=1 表不存在  isError=2  列不存在
 	*/
 	table* select(m_string tableName, m_string *columns=&m_string("*"),int columnNum=1, m_string column=m_string("") , m_string value=m_string(""), char opt = ' ') ;
 

@@ -56,7 +56,10 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 		}
 	}
 	//如果表不存在
-	//if (rs == 0) throw error;
+	if (rs == 0) {
+		tb->isError = 1;
+		return tb;
+	}
 
 	//申请buffer manager将这个表读入内存成为char [][][]形式
 	//char ***data = buffer_manager.read(tableName);
@@ -64,18 +67,24 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 	m_string ** data = r.read_table(tb->table_name, tb->row_num, tb->column_num);
 	int t = 0;
 	m_string **newData;
+	rs = 0;
 	//检查约束条件
 	if (opt != ' ') {
 		int r = 0, c = 0, isInt = 0, isFloat = 0;;
 		for (int i = 0; i < tb->column_num; i++) {
 			if (column == tb->columns[i].column_name) {
 				c = i;
+				rs = 1;
 				if (strcmp(tb->columns[i].data_type.str, "int") == 0)
 					isInt = 1;
 				if (strcmp(tb->columns[i].data_type.str, "float") == 0)
 					isFloat = 1;
 				break;
 			}
+		}
+		if (rs == 0) {
+			tb->isError = 2;
+			return tb;
 		}
 		newData = new m_string*[tb->row_num];
 		for (int i = 0; i < tb->row_num; i++) {
@@ -257,7 +266,7 @@ int record_manager::add(m_string tableName, m_string* newRow)
 			break;
 		}
 	}
-
+	if (rs == 0)return -1;
 	m_string **originData = r.read_table(tb->table_name, tb->row_num, tb->column_num);
 	originData[tb->row_num] = new m_string[tb->column_num];
 	//if(rs==0)throw error
