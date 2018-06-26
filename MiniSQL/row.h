@@ -8,5 +8,6 @@ public:
 	row(m_string *data, int col_num, int colId[]); 
 	~row();
 	m_string *data;
+	int id;
 };
 
