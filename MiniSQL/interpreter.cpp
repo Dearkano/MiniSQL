@@ -139,7 +139,7 @@ string Input()
 	string sql = "";
 	string temp;
 	bool finish = false;
-	cout << ">>> ";
+	cout << "sql> ";
 	while (!finish)
 	{
 		getline(cin, temp);
@@ -156,7 +156,7 @@ string Input()
 		else
 		{
 			sql += (temp + " ");
-			cout << ">>> ";
+			cout << "---> ";
 		}
 	}
 	return sql;
@@ -194,6 +194,8 @@ string ExecFile(string path)
 	{
 		getline(inf, temp);
 		trim(temp);
+		if (temp.length() == 0)
+			continue;
 		if (temp[temp.length() - 1] == ';')
 		{
 			temp[temp.length() - 1] = ' ';
@@ -281,8 +283,7 @@ string  Drop(string sql)
 	}
 	else if (keyWord == "index")
 	{
-		// sql = DropIndex(sql);
-		sql = "80";
+		sql = DropIndex(sql);
 	}
 	else
 	{
@@ -799,14 +800,9 @@ string DropIndex(string sql)
 			return "99";
 		}
 		trim(tableName);
-		int result = drop_index_api(tableName);
-		if (result == 1)
-		{
-			cerr << "drop index错误：查无此索引" << endl;
-			return "99";
-		}
-		cout << "删除索引" << tableName << "成功" << endl;
-		sql = "80";
+		string result = drop_index_api(tableName);
+		return result;
+		cout << "delete from " << tableName << " success" << endl;
 	}
 	else
 	{
@@ -1424,7 +1420,7 @@ string CreateIndex(string sql)
 		return "99";
 	}
 	cout << indexName << " " << table << " " << attr << endl;
-	string result = create_index_api(table, attr, attr);
+	string result = create_index_api(table, attr, indexName);
 	sql = result;
 	return sql;
 }
