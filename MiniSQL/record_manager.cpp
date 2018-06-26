@@ -381,6 +381,17 @@ temp_row record_manager::select_row(m_string tableName, m_string column, m_strin
 	m_string ** data = r.read_table(tb->table_name, tb->row_num, tb->column_num);
 
 	int c = -1;
+	int count = 0;
+	int *res = new int[1000];
+	if (opt == 0) {
+		for (int i = 0; i < tb->row_num; i++)
+			res[i] = i;
+		temp_row *tt = new temp_row();
+		tt->row = res;
+		tt->num = tb->row_num;
+		return*tt;
+	}
+
 	for (int i = 0; i < tb->column_num; i++) {
 		if (tb->columns[i].column_name == column) {
 			c = i;
@@ -389,16 +400,8 @@ temp_row record_manager::select_row(m_string tableName, m_string column, m_strin
 	}
 	tt->num = -2;
 	if (c == -1)return *tt;
-	int count = 0;
-	int *res = new int[1000];
-	if (opt == 0) {
-		for (int i = 0; i < tb->row_num; i++)
-			res[i] = i;
-		temp_row *tt= new temp_row();
-		tt->row = res;
-		tt->num = tb->row_num;
-		return* tt;
-	}
+
+
 	for (int i = 0; i < tb->row_num; i++) {
 		switch (opt) {
 		case '=':
