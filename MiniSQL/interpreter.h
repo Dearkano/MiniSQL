@@ -38,6 +38,7 @@ struct InterTable
 {
 	string tableName;
 	string prKey;    // Ö÷¼ü
+	vector<string> orderAttr;
 	map<string, attrInfo> attrList;
 };
 
