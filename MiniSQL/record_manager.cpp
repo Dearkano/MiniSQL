@@ -63,7 +63,7 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 
 	//申请buffer manager将这个表读入内存成为char [][][]形式
 	//char ***data = buffer_manager.read(tableName);
-
+	int rowIds[1000];
 	m_string ** data = r.read_table(tb->table_name, tb->row_num, tb->column_num);
 	int t = 0;
 	m_string **newData;
@@ -106,15 +106,15 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 					ss << value;
 					ss >> v;
 					if (isInt&&n == v) {
-						newData[r++] = data[i];
+						newData[r] = data[i];rowIds[r++]=i;
 					}
 					else if (isFloat&&f == v) {
-						newData[r++] = data[i];
+						newData[r] = data[i];rowIds[r++]=i;
 					}
 				}
 				else {
 					if (strcmp(value.str, data[i][c].str) == 0)
-						newData[r++] = data[i];
+						newData[r] = data[i];rowIds[r++]=i;
 				}
 				break;
 			case'>':
@@ -129,10 +129,10 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 				ss >> v;
 
 				if (isInt&&n > v) {
-					newData[r++] = data[i];
+					newData[r] = data[i];rowIds[r++]=i;
 				}
 				else if (isFloat&&f > v) {
-					newData[r++] = data[i];
+					newData[r] = data[i];rowIds[r++]=i;
 				}
 				break;
 			case'<':
@@ -146,10 +146,10 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 				ss << value;
 				ss >> v;
 				if (isInt&&n < v) {
-					newData[r++] = data[i];
+					newData[r] = data[i];rowIds[r++]=i;
 				}
 				else if (isFloat&&f < v) {
-					newData[r++] = data[i];
+					newData[r] = data[i];rowIds[r++]=i;
 				}
 				break;
 			case'g':
@@ -163,10 +163,10 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 				ss << value;
 				ss >> v;
 				if (isInt&&n >= v) {
-					newData[r++] = data[i];
+					newData[r] = data[i];rowIds[r++]=i;
 				}
 				else if (isFloat&&f >= v) {
-					newData[r++] = data[i];
+					newData[r] = data[i];rowIds[r++]=i;
 				}
 				break;
 			case'l':
@@ -180,10 +180,10 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 				ss << value;
 				ss >> v;
 				if (isInt&&n <= v) {
-					newData[r++] = data[i];
+					newData[r] = data[i];rowIds[r++]=i;
 				}
 				else if (isFloat&&f <= v) {
-					newData[r++] = data[i];
+					newData[r] = data[i];rowIds[r++]=i;
 				}
 				break;
 			case'!':
@@ -199,15 +199,15 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 					ss << value;
 					ss >> v;
 					if (isInt&&n != v) {
-						newData[r++] = data[i];
+						newData[r] = data[i];rowIds[r++]=i;
 					}
 					else if (isFloat&&f != v) {
-						newData[r++] = data[i];
+						newData[r] = data[i];rowIds[r++]=i;
 					}
 				}
 				else {
 					if (strcmp(value.str, data[i][c].str) != 0)
-						newData[r++] = data[i];
+						newData[r] = data[i];rowIds[r++]=i;
 				}
 				break;
 			}
@@ -222,7 +222,7 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 	if (columnNum == 1 && strcmp(columns[0].str, "*") == 0) {
 		for (int i = 0; i < tb->row_num; i++) {
 			tb->rows[i] = new row(newData[i], tb->column_num);
-			tb->rows[i]->id = i;
+			tb->rows[i]->id = rowIds[i];
 		}
 		//free(data);
 
@@ -243,7 +243,7 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 
 		for (int i = 0; i < tb->row_num; i++) {
 			tb->rows[i] = new row(newData[i], tb->column_num, colId);
-			tb->rows[i]->id = i;
+			tb->rows[i]->id = rowIds[i];
 		}
 		tb->column_num = columnNum;
 	/*	free(data);
