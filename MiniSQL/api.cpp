@@ -4,7 +4,8 @@
 #include <set>
 #include <algorithm>
 #include"IndexManager.h"
-#define DEBUG
+#include "catalog_manager.h"
+// #define DEBUG
 IndexManager im;
 
 int create_table_api(InterTable newTable)
@@ -417,7 +418,7 @@ int drop_table_api(string tableName)
 
 string create_index_api(string tableName, string attr, string indexName)
 {
-	//----------//
+	
 	data_dictionary dt;
 	database *db = dt.db;
 	int flag = -1;
@@ -444,6 +445,24 @@ string create_index_api(string tableName, string attr, string indexName)
 			cerr << "创建索引错误：列名不合法" << endl;
 			return "99";
 		}
+		int result = dt.add_index(m_string(tableName),m_string(attr), m_string(indexName));
+		switch (result)
+		{
+		case 0:
+			break;
+		case 1:
+			cout << "create index error: no such table" << endl;
+			return "99";
+		case 2:
+			cout << "create index error: index already exists" << endl;
+			return "99";
+		case 3:
+			cout << "create index error: no such attribute" << endl;
+			return "99";
+		default:
+			return "99";
+			break;
+		}
 		int i;
 		for (i = 0; i < db->tables[flag]->column_num; i++)
 		{
@@ -453,11 +472,11 @@ string create_index_api(string tableName, string attr, string indexName)
 				break;
 			}
 		}
-		if (i >= db->tables[flag]->column_num)
+		/*if (i >= db->tables[flag]->column_num)
 		{
 			cerr << "创建索引错误：无此属性" << endl;
 			return "99";
-		}
+		}*/
 		if (type == "char")
 		{
 			try {
@@ -509,8 +528,32 @@ string create_index_api(string tableName, string attr, string indexName)
 	}
 }
 
-int drop_index_api(string indexName)
+string drop_index_api(string indexName)
 {
-	im.drop_index(indexName);
-	return 0;
+	data_dictionary dc;
+	int result = dc.delete_index(m_string(indexName));
+	switch (result)
+	{
+		case 0:
+			break;
+		case 1:
+			cout << "drop index error: no such table" << endl;
+			return "99";
+		case 2:
+			cout << "drop index error: no such index" << endl;
+			return "99";
+		default:
+			return "99";
+			break;
+	}
+	try {
+		im.drop_index(indexName);
+		cout << "drop index success" << endl;
+		return "80";
+	}
+	catch (std::exception& e)
+	{
+		e.what();
+		return "99";
+	}
 }
