@@ -18,8 +18,8 @@ public:
 	//大小
 	int data_size;
 	//唯一
-	bool unique;
+	int unique;
 	//主键
-	bool isPrimaryKey;
+	int isPrimaryKey;
 	
 };

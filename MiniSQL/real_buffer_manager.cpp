@@ -34,7 +34,7 @@ m_string** real_buffer_manager::read_table(m_string tableName, int rowNum, int c
 	for (int i = 0; i < rowNum; i++) {
 		data[i] = new m_string[colNum];
 		for (int j = 0; j < colNum; j++) {
-			fread(data[i][j].str, sizeof(char), sizeof(m_string), fp);
+			fread(data[i][j].str, sizeof(char), 256, fp);
 		}
 	}
 	fclose(fp);
@@ -49,7 +49,7 @@ int real_buffer_manager::update_table(m_string tableName, m_string ** data, int 
 
 	for (int i = 0; i < rowNum; i++) {
 		for (int j = 0; j < colNum; j++) {
-			fwrite(data[i][j].str, sizeof(char), sizeof(m_string), fp);
+			fwrite(data[i][j].str, sizeof(char), 256, fp);
 		}		
 	}
 

@@ -3,6 +3,9 @@
 #include <cstring>
 #include <set>
 #include <algorithm>
+#include"IndexManager.h"
+
+IndexManager im;
 
 int create_table_api(InterTable newTable)
 {
@@ -310,6 +313,7 @@ string select_api(string tableName, vector<string> attrList, vector<condition> o
 					cout << result->rows[i]->data[j] << "\t\t";
 				cout << endl;
 			}
+			result = NULL;
 		}
 		else
 		{

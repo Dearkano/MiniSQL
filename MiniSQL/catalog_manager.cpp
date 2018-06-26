@@ -18,7 +18,7 @@ int data_dictionary::create_table(table table) {
 	}
 
 	//--------------预检结束
-
+	if (db->tableNum < 0)db->tableNum = 0;
 	db->tables[db->tableNum] = &table;
 	db->tableNum++;
 	this->update_database();
@@ -250,7 +250,7 @@ int data_dictionary::is_unique_or_pk(m_string tableName, int colNum)
 	return 0;
 }
 void data_dictionary::update() {
-	delete this->db;
+	//delete this->db;
 	this->db = new database();
 }
 data_dictionary::data_dictionary() {
@@ -272,7 +272,7 @@ void data_dictionary::update_database() {
 	for (int i = 0; i < db->tableNum; i++) {
 		table table = *db->tables[i];
 		//写入表名
-		fwrite(table.table_name.str, sizeof(char), sizeof(m_string), fp);
+		fwrite(table.table_name.str, sizeof(char),256, fp);
 
 		//写入列数 行数
 		fwrite(&table.column_num, sizeof(int), 1, fp);
@@ -280,16 +280,16 @@ void data_dictionary::update_database() {
 		//写入索引数，索引
 		fwrite(&table.index_num, sizeof(int), 1, fp);
 		for (int i = 0; i < table.index_num; i++) {
-			fwrite(table.index_names[i].str, sizeof(char), sizeof(m_string), fp);
+			fwrite(table.index_names[i].str, sizeof(char), 256, fp);
 		}
 		//写入列属性
 		for (int i = 0; i < table.column_num; i++) {
 
 			//写入列名
-			fwrite(table.columns[i].column_name.str, sizeof(char), sizeof(m_string), fp);
+			fwrite(table.columns[i].column_name.str, sizeof(char), 256, fp);
 
 			//写入数据类型
-			fwrite(table.columns[i].data_type.str, sizeof(char), sizeof(m_string), fp);
+			fwrite(table.columns[i].data_type.str, sizeof(char), 256, fp);
 
 			//写入数据长度
 			fwrite(&table.columns[i].data_size, sizeof(int), 1, fp);
