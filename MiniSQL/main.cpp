@@ -101,11 +101,12 @@ int main()
 		input = Input();
 		string temp = input;
 		RemoveSpace(temp);
-		if (temp == "describe;")
+		if (temp == "describe;" || temp == "describe ;")
 		{
+			db.db = new database();
 			db.listTable();
 		}
-		if (temp == "quit;")
+		else if (temp == "quit;")
 		{
 			break;
 		}
