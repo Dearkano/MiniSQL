@@ -13,7 +13,6 @@ using namespace boost;
 
 
 
-
 // 限制种类
 enum RESTRICT { DEFAULT, PRKEY, FRKEY, ERR };
 enum COD {BIG, SMALL, EQUAL, NOTSMALL, NOTBIG, NOTEQUAL};

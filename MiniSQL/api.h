@@ -11,5 +11,6 @@ int delete_from_api(string tableName, vector<condition> option);
 //table* select_from_api(string tableName, vector<string> attrList);
 // 以上两个函数接口不予暴露
 string select_api(string tableName, vector<string> attrList, vector<condition> options);
+int drop_table_api(string tableName);
 
 #endif // !_API_H_
