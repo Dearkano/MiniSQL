@@ -155,6 +155,7 @@ int data_dictionary::delete_index(m_string name)
 	}
 	FILE *fp;
 	fp = fopen("./index.dat", "rb");
+	if (fp);
 	m_string tableName, colName, _name;
 	for (int i = 0; i < totalIndex; i++) {
 		fread(tableName.str, sizeof(char), 256, fp);

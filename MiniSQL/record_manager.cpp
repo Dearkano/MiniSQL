@@ -253,7 +253,7 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 			tb->rows[i]->id = rowIds[i];
 		}
 		//free(data);
-		delete data;
+		//delete data;
 		return tb;
 	}
 	// select id name
