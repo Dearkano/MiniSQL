@@ -304,7 +304,30 @@ int record_manager::add(m_string tableName, m_string* newRow)
 	tb = NULL;
 	return 0;
 }
-
+int record_manager::drop_table(m_string tableName) {
+	database *db = this->dict.db;
+	table *tb = new table();
+	int count = 0;
+	int rs = 0;
+	int t;
+	for (int i = 0; i < db->tableNum; i++) {
+		if (tableName == db->tables[i].table_name) {
+			*tb = db->tables[i];
+			t = i;
+			rs = 1;
+			break;
+		}
+	}
+	if (rs == 0)return 1;
+	string str(tableName.str);
+	real_buffer_manager b;
+	m_string mstr(str);
+	b.delete_dbFile(mstr);
+	b.create_dbFile(mstr);
+	this->dict.delete_table(tableName);
+	this->dict.update_database();
+	return 0;
+}
 int record_manager::_delete(m_string tableName, m_string column, m_string value, char opt)
 {
 	database *db = this->dict.db;
@@ -331,7 +354,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 		int count = db->tables[t].row_num;
 		db->tables[t].row_num = 0;
 	//	this->dict.delete_table(tableName);
-	//	this->dict.update_database();
+		this->dict.update_database();
 		return count;
 	}
 

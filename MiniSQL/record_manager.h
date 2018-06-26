@@ -44,4 +44,6 @@ public:
 	  update("table1","name","andy","major",'=',"biology")
 	*/
 	int update(m_string tableName, m_string column1, m_string value1, m_string column2  ,m_string value2 , char opt = ' ');
+
+	int drop_table(m_string tableName);
 };
