@@ -77,6 +77,18 @@
     <ClInclude Include="api.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="BPTree.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="exceptions.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IndexManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

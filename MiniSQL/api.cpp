@@ -3,6 +3,9 @@
 #include <cstring>
 #include <set>
 #include <algorithm>
+#include"IndexManager.h"
+
+IndexManager im;
 
 int create_table_api(InterTable newTable)
 {
