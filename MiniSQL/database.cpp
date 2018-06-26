@@ -28,8 +28,8 @@ database::database()
 			fread(&tables[i]->index_num, sizeof(int), 1, fp);
 			//column *columns = new column[columnNum];
 			//m_string *indexNames = new m_string[indexNum];
-			for (int i = 0; i < tables[i]->index_num; i++) {
-				fread(tables[i]->index_names[i].str, sizeof(char), sizeof(m_string), fp);
+			for (int j = 0; j < tables[i]->index_num; j++) {
+				fread(tables[i]->index_names[j].str, sizeof(char), sizeof(m_string), fp);
 			}
 			for (int j = 0; j < tables[i]->column_num; j++) {
 				m_string columnName, dataType;
