@@ -325,8 +325,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 	real_buffer_manager b;
 	if (opt == ' ') {
 		string str(tableName.str);
-		string filepath = "./dbfile/" + str + ".dat";
-		m_string mstr(filepath);
+		m_string mstr(str);
 		b.delete_dbFile(mstr);
 		int count = db->tables[t].row_num;
 	//	this->dict.delete_table(tableName);
