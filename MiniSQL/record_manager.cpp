@@ -360,6 +360,70 @@ int record_manager::drop_table(m_string tableName) {
 	this->dict.update_database();
 	return 0;
 }
+temp_row record_manager::select_row(m_string tableName, m_string column, m_string value, char opt)
+{
+	database *db = this->dict.db;
+	int t = 0;
+	table* tb = new table();
+	int rs = 0;
+	for (int i = 0; i < db->tableNum; i++) {
+		if (db->tables[i]->table_name == tableName) {
+			t = i;
+			rs = 1;
+			tb = db->tables[i];
+			break;
+		}
+	}
+	temp_row *tt = new temp_row();
+	tt->num = -1;
+	if (rs == 0) return *tt ;
+	real_buffer_manager r;
+	m_string ** data = r.read_table(tb->table_name, tb->row_num, tb->column_num);
+
+	int c = -1;
+	for (int i = 0; i < tb->column_num; i++) {
+		if (tb->columns[i].column_name == column) {
+			c = i;
+			break;
+		}
+	}
+	tt->num = -2;
+	if (c == -1)return *tt;
+	int count = 0;
+	int *res=new int[1000];
+	for (int i = 0; i < tb->row_num; i++) {
+		switch (opt) {
+		case '=':
+			if (data[i][c] == value)
+				res[count++] = i;
+			break;
+		case'>':
+			if (data[i][c] > value)
+				res[count++] = i;
+			break;
+		case '<':
+			if (data[i][c] < value)
+				res[count++] = i;
+			break;
+		case '!':
+			if (data[i][c] != value)
+				res[count++] = i;
+			break;
+		case 'g':
+			if (data[i][c] >= value)
+				res[count++] = i;
+			break;
+		case 'l':
+			if (data[i][c] <= value)
+				res[count++] = i;
+			break;
+		}
+	}
+	temp_row *tr = new temp_row();
+	tr->num = count;
+	tr->row = res;
+	return *tr;
+}
 int record_manager::_delete(m_string tableName, m_string column, m_string value, char opt)
 {
 	database *db = this->dict.db;
@@ -687,14 +751,49 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 	tb = NULL;
 	return count;
 }
-int record_manager::_delete_2(m_string tableName, int *rows,int row_num)
+
+temp_row mix(temp_row tr1,temp_row tr2) {
+	int i = 0;
+	int j = 0;
+	int k = 0;
+	int *mix = new int[1000];
+	while (i < tr1.num && j < tr2.num)
+	{
+		if (tr1.row[i] == tr2.row[j])
+		{
+			mix[k++] = tr1.row[i];
+			i++;
+			j++;
+		}
+		else if (tr1.row[i]>tr2.row[j])
+			j++;
+		else if (tr1.row[i]<tr2.row[j])
+			i++;
+	}
+	temp_row * tr = new temp_row();
+	tr->num = k;
+	tr->row = mix;
+	return *tr;
+}
+
+int record_manager::_delete_2(m_string tableName,int opt_num,m_string column_name[],m_string value[],char opt[] )
 {
+
 	database *db = this->dict.db;
 	real_buffer_manager b;
 	table *tb = new table();
 	int rs = 0;
 	int t;
-	
+	if (opt_num == 0) {
+		string str(tableName.str);
+		m_string mstr(str);
+		b.delete_dbFile(mstr);
+		b.create_dbFile(mstr);
+		int count = db->tables[t]->row_num;
+		db->tables[t]->row_num = 0;
+		this->dict.update_database();
+		return count;
+	}
 	for (int i = 0; i < db->tableNum; i++) {
 		if (tableName == db->tables[i]->table_name) {
 			tb = db->tables[i];
@@ -703,6 +802,20 @@ int record_manager::_delete_2(m_string tableName, int *rows,int row_num)
 			break;
 		}
 	}
+
+	temp_row tr1 = this->select_row(tb->table_name, column_name[0], value[0], opt[0]);
+	temp_row *tr = new temp_row();
+	for (int i = 1; i < opt_num; i++) {
+		temp_row tr2 = this->select_row(tb->table_name, column_name[i], value[i], opt[i]);
+		*tr = mix(tr1, tr2);
+		tr1.num = tr->num;
+		tr1.row = tr->row;
+	}
+
+	int row_num = tr->num;
+	int *rows = tr->row;
+
+
 	m_string **data = b.read_table(tb->table_name, tb->row_num, tb->column_num);
 	m_string **newData = new m_string*[tb->row_num - row_num];
 	if (rs == 0)return 1;
@@ -721,6 +834,84 @@ int record_manager::_delete_2(m_string tableName, int *rows,int row_num)
 		this->dict.db->tables[t]->row_num = p;
 		this->dict.update_database();
 	return p;
+}
+table* record_manager::select_2(m_string tableName, int opt_num, m_string column_name[], m_string value[], char opt[], m_string res_name[],int col_num)
+{
+	
+	database *db = this->dict.db;
+	int rs = 0;
+	table *tb = new table();
+	int t;
+	for (int i = 0; i < db->tableNum; i++) {
+		if (tableName == db->tables[i]->table_name) {
+			tb = db->tables[i];
+			t = i;
+			rs = 1;
+			break;
+		}
+	} 
+	if (rs == 0) {
+		tb->isError = 1;
+		return tb;
+	}
+	real_buffer_manager b;
+	m_string **data1 = b.read_table(tb->table_name, tb->row_num, tb->column_num);
+	m_string **data = new m_string*[tb->row_num];
+	for (int i = 0; i < tb->row_num; i++) data[i] = data1[i];
+
+
+	temp_row tr1 = this->select_row(tb->table_name, column_name[0], value[0], opt[0]);
+	temp_row *tr = new temp_row();
+	for (int i = 1; i < opt_num; i++) {
+		temp_row tr2 = this->select_row(tb->table_name, column_name[i], value[i], opt[i]);
+		*tr = mix(tr1, tr2);
+		tr1.num = tr->num;
+		tr1.row = tr->row;
+	}
+
+	int row_num = tr->num;
+	int *rows = tr->row;
+
+	table *_table = new table();
+	_table->row_num = row_num;
+	_table->columns = tb->columns;
+	_table->index_num = tb->index_num;
+	_table->index_names = tb->index_names;
+	if (col_num == -1)
+		_table->column_num = tb->column_num;
+	else
+		_table->column_num == col_num;
+
+		//select *
+	if (col_num==-1) {
+		int p = 0;
+		for (int i = 0; i < tb->row_num; i++) {
+			if (i == rows[p]) {
+				_table->rows[p++] = new row(data[i],tb->column_num);
+			}
+		}
+	}
+	else {
+		int colId[10];
+		int t = 0;
+		for (int i = 0; i < col_num; i++) {
+			for (int j = 0; j < tb->column_num; j++) {
+				if (res_name[i] == tb->columns[j].column_name) {
+					colId[t] = j;
+					_table->columns[t++] = tb->columns[j];
+					break;
+				}
+			}
+		}
+		_table->column_num = t;
+		int p = 0;
+		for (int i = 0; i < tb->row_num; i++) {
+			if (i == rows[p]) {
+				_table->rows[p++] = new row(data[i], col_num,colId);
+			}
+		}
+	}
+	return _table;
 }
 int record_manager::update(m_string tableName, m_string column1, m_string value1, m_string column2, m_string value2, char opt)
 {

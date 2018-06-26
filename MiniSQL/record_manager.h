@@ -3,6 +3,12 @@
 #include"table.h"
 #include"column.h"
 #include"catalog_manager.h"
+
+class temp_row {
+public:
+	int *row;
+	int num;
+};
 class record_manager {
 public:
 	record_manager();
@@ -38,8 +44,10 @@ public:
 	  _delete("table1","id","1",'=');
 	  -1:表不存在 -2：列不存在
 	*/
+	temp_row select_row(m_string tableName, m_string column, m_string value, char opt);
 	int _delete(m_string tableName, m_string column =m_string(""), m_string value=m_string("") ,char opt = ' ');
-	int _delete_2(m_string tableName, int *rows,int row_num);
+	int _delete_2(m_string tableName, int opt_num=0, m_string column_name[]=NULL, m_string value[]=NULL, char opt[]=NULL);
+	table *select_2(m_string tableName, int opt_num = 0, m_string column_name[] = NULL, m_string value[] = NULL, char opt[] = NULL, m_string res_name[]=NULL,int col_num=-1);
 	/*
 	  update table1 set name = 'andy' where major = 'biology'
 	  =>
