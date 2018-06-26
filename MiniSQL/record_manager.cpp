@@ -328,8 +328,8 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 		m_string mstr(filepath);
 		b.delete_dbFile(mstr);
 		int count = db->tables[t].row_num;
-		this->dict.delete_table(tableName);
-		this->dict.update_database();
+	//	this->dict.delete_table(tableName);
+	//	this->dict.update_database();
 		return count;
 	}
 
