@@ -435,7 +435,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
 					}
-					i = 0;
+					i = -1;
 					count++;
 				}
 				else if (isFloat&&f == f1) {
@@ -443,7 +443,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
 					}
-					i = 0;
+					i = -1;
 					count++;
 				}
 			}
@@ -453,129 +453,177 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
 					}
-					i = 0;
+					i = -1;
 					count++;
 				}
 			}
 			break;
 		case'>':
-			s = data[i][c].str;
-			ss << s;
-			if (isInt == 1)
-				ss >> n;
-			if (isFloat == 1)
-				ss >> f;
-			ss.clear();
-			ss << value;
-			if (isInt == 1)
-			ss >> v;
-			if (isFloat == 1)
-				ss >> f1;
-			if (isInt&&n > v) {
-				tb->row_num--;
-				for (int j = i; j < tb->row_num; j++) {
-					data[j] = data[j + 1];
+			if (isInt || isFloat) {
+				s = data[i][c].str;
+				ss << s;
+				if (isInt == 1)
+					ss >> n;
+				if (isFloat == 1)
+					ss >> f;
+				ss.clear();
+				ss << value;
+				if (isInt == 1)
+					ss >> v;
+				if (isFloat == 1)
+					ss >> f1;
+				if (isInt&&n > v) {
+					tb->row_num--;
+					for (int j = i; j < tb->row_num; j++) {
+						data[j] = data[j + 1];
+					}
+					i = -1;
+					count++;
 				}
-				i = 0;
-				count++;
+				else if (isFloat&&f > f1) {
+					tb->row_num--;
+					for (int j = i; j < tb->row_num; j++) {
+						data[j] = data[j + 1];
+					}
+					i = -1;
+					count++;
+				}
 			}
-			else if (isFloat&&f > f1) {
-				tb->row_num--;
-				for (int j = i; j < tb->row_num; j++) {
-					data[j] = data[j + 1];
+			else {
+				if (data[i][c]>value) {
+					tb->row_num--;
+					for (int j = i; j < tb->row_num; j++) {
+						data[j] = data[j + 1];
+					}
+					i = -1;
+					count++;
 				}
-				i = 0;
-				count++;
 			}
 			break;
 		case'<':
-			s = data[i][c];
-			ss << s;
-			if (isInt == 1)
-				ss >> n;
-			if (isFloat == 1)
-				ss >> f;
-			ss.clear();
-			ss << value;
-			if (isInt == 1)
-			ss >> v;
-			if (isFloat == 1)
-				ss >> f1;
-			if (isInt&&n < v) {
-				tb->row_num--;
-				for (int j = i; j < tb->row_num; j++) {
-					data[j] = data[j + 1];
+			if (isInt || isFloat) {
+				s = data[i][c];
+				ss << s;
+				if (isInt == 1)
+					ss >> n;
+				if (isFloat == 1)
+					ss >> f;
+				ss.clear();
+				ss << value;
+				if (isInt == 1)
+					ss >> v;
+				if (isFloat == 1)
+					ss >> f1;
+				if (isInt&&n < v) {
+					tb->row_num--;
+					for (int j = i; j < tb->row_num; j++) {
+						data[j] = data[j + 1];
+					}
+					i = -1;
+					count++;
 				}
-				i = 0;
-				count++;
+				else if (isFloat&&f < f1) {
+					tb->row_num--;
+					for (int j = i; j < tb->row_num; j++) {
+						data[j] = data[j + 1];
+					}
+					i = -1;
+					count++;
+				}
 			}
-			else if (isFloat&&f < f1) {
-				tb->row_num--;
-				for (int j = i; j < tb->row_num; j++) {
-					data[j] = data[j + 1];
+			else {
+				if (data[i][c]<value) {
+					tb->row_num--;
+					for (int j = i; j < tb->row_num; j++) {
+						data[j] = data[j + 1];
+					}
+					i = -1;
+					count++;
 				}
-				i = 0;
-				count++;
 			}
 			break;
 		case'g':
-			s = data[i][c];
-			ss << s;
-			if (isInt == 1)
-				ss >> n;
-			if (isFloat == 1)
-				ss >> f;
-			ss.clear();
-			ss << value;
-			if (isInt == 1)
-			ss >> v;
-			if (isFloat == 1)
-				ss >> f1;
-			if (isInt&&n >= v) {
-				tb->row_num--;
-				for (int j = i; j < tb->row_num; j++) {
-					data[j] = data[j + 1];
+			if (isInt || isFloat) {
+				s = data[i][c];
+				ss << s;
+				if (isInt == 1)
+					ss >> n;
+				if (isFloat == 1)
+					ss >> f;
+				ss.clear();
+				ss << value;
+				if (isInt == 1)
+					ss >> v;
+				if (isFloat == 1)
+					ss >> f1;
+				if (isInt&&n >= v) {
+					tb->row_num--;
+					for (int j = i; j < tb->row_num; j++) {
+						data[j] = data[j + 1];
+					}
+					i = -1;
+					count++;
 				}
-				i = 0;
-				count++;
+				else if (isFloat&&f >= f1) {
+					tb->row_num--;
+					for (int j = i; j < tb->row_num; j++) {
+						data[j] = data[j + 1];
+					}
+					i = -1;
+					count++;
+				}
 			}
-			else if (isFloat&&f >= f1) {
-				tb->row_num--;
-				for (int j = i; j < tb->row_num; j++) {
-					data[j] = data[j + 1];
+			else {
+				if (data[i][c]>=value) {
+					tb->row_num--;
+					for (int j = i; j < tb->row_num; j++) {
+						data[j] = data[j + 1];
+					}
+					i = -1;
+					count++;
 				}
-				i = 0;
-				count++;
 			}
 			break;
 		case'l':
-			s = data[i][c];
-			ss << s;
-			if (isInt == 1)
-				ss >> n;
-			if (isFloat == 1)
-				ss >> f;
-			ss.clear();
-			ss << value;
-			if (isInt == 1)
-			ss >> v;
-			if (isFloat == 1)
-				ss >> f1;
-			if (isInt&&n <= v) {
-				tb->row_num--;
-				for (int j = i; j < tb->row_num; j++) {
-					data[j] = data[j + 1];
+			if (isInt || isFloat) {
+				s = data[i][c];
+				ss << s;
+				if (isInt == 1)
+					ss >> n;
+				if (isFloat == 1)
+					ss >> f;
+				ss.clear();
+				ss << value;
+				if (isInt == 1)
+					ss >> v;
+				if (isFloat == 1)
+					ss >> f1;
+				if (isInt&&n <= v) {
+					tb->row_num--;
+					for (int j = i; j < tb->row_num; j++) {
+						data[j] = data[j + 1];
+					}
+					i = -1;
+					count++;
 				}
-				i = 0;
-				count++;
 			}
 			else if (isFloat&&f <= f1) {
 				tb->row_num--;
 				for (int j = i; j < tb->row_num; j++) {
 					data[j] = data[j + 1];
 				}
-				i = 0;
+				i = -1;
 				count++;
+			}
+			else {
+				if (data[i][c]<=value) {
+					tb->row_num--;
+					for (int j = i; j < tb->row_num; j++) {
+						data[j] = data[j + 1];
+					}
+					i = -1;
+					count++;
+				}
 			}
 			break;
 		case'!':
@@ -598,7 +646,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
 					}
-					i = 0;
+					i = -1;
 					count++;
 				}
 				else if (isFloat&&f != f1) {
@@ -606,7 +654,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
 					}
-					i = 0;
+					i = -1;
 					count++;
 				}
 			}
@@ -616,7 +664,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
 					}
-					i = 0;
+					i = -1;
 					count++;
 				}
 			}
@@ -634,12 +682,46 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 	//申请buffer manager将表更改后的内容存入硬盘
 	//将table重新变成char newData[][][]类型
 	//int result = buffer_manager.update(tableName,newData);
-	free(data);
+	//free(data);
 	delete tb;
 	tb = NULL;
 	return count;
 }
-
+int record_manager::_delete_2(m_string tableName, int *rows,int row_num)
+{
+	database *db = this->dict.db;
+	real_buffer_manager b;
+	table *tb = new table();
+	int rs = 0;
+	int t;
+	
+	for (int i = 0; i < db->tableNum; i++) {
+		if (tableName == db->tables[i]->table_name) {
+			tb = db->tables[i];
+			t = i;
+			rs = 1;
+			break;
+		}
+	}
+	m_string **data = b.read_table(tb->table_name, tb->row_num, tb->column_num);
+	m_string **newData = new m_string*[tb->row_num - row_num];
+	if (rs == 0)return 1;
+	int p = 0;
+	int j = 0;
+		for (int i = 0; i < db->tables[t]->row_num; i++) {
+	
+			if (rows[j] == i) {
+				j++;
+			}
+			else {
+				newData[p++] = data[i];
+			}
+		}
+		b.update_table(tb->table_name, newData, p, tb->column_num);
+		this->dict.db->tables[t]->row_num = p;
+		this->dict.update_database();
+	return p;
+}
 int record_manager::update(m_string tableName, m_string column1, m_string value1, m_string column2, m_string value2, char opt)
 {
 	database *db = this->dict.db;
@@ -849,8 +931,8 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 	}
 	real_buffer_manager r;
 	r.update_table(tb->table_name, d, tb->row_num, tb->column_num);
-	free(d);
-	free(data);
+	//free(d);
+	//free(data);
 	delete tb;
 	tb = NULL;
 	return 0;

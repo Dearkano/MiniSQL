@@ -137,7 +137,9 @@ int main()
 //	m_string tableName("book");
 //	m_string colName("bno");
 //	m_string name("index1");
-//	//d.add_index(tableName, colName, name);
+//	record_manager r;
+//	int rows[2]{ 1,4 };
+//	r._delete_2(m_string("t2"),rows,2);
 //	d.listTable();
 //	system("pause");
 //}
