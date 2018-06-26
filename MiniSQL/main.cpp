@@ -90,15 +90,9 @@ using namespace std;
 //}
 
 int main() {
-	record_manager rc;
-	m_string m_tableName("book");
-	m_string att("*");
-	m_string *attr = new m_string[1]{ att };
-	int columnNum = 1;
-	for (int i = 0; i < 100; i++) {
-		table* result = rc.select(m_tableName, attr, columnNum);
-		cout << "µÚ" << i << "´Î" << endl;
-	}
+	data_dictionary d;
+	d.delete_index(m_string("book"), m_string("bno"));
+	d.listTable();
 	
 	system("pause");
 }

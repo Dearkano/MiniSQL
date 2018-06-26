@@ -117,7 +117,7 @@ int data_dictionary::add_index(m_string tableName, m_string indexName)
 	//插入新索引
 
 	m_string *indexes = new m_string[tb.index_num + 1];
-	for (int i = 0; i < tb.index_num + 1; i++) {
+	for (int i = 0; i < tb.index_num ; i++) {
 		indexes[i] = tb.index_names[i];
 	}
 	indexes[tb.index_num] = indexName;
@@ -125,6 +125,7 @@ int data_dictionary::add_index(m_string tableName, m_string indexName)
 	tb.index_num++;
 	db->tables[t] = &tb;
 	this->update_database();
+	this->db = new database();
 	return 0;
 }
 int data_dictionary::delete_index(m_string tableName, m_string indexName)
@@ -168,6 +169,7 @@ int data_dictionary::delete_index(m_string tableName, m_string indexName)
 	tb.index_num--;
 	db->tables[t] =&tb;
 	this->update_database();
+	this->db = new database();
 	return 0;
 }
 void data_dictionary::build_dictionary() {
