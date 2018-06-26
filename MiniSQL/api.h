@@ -12,5 +12,7 @@ int delete_from_api(string tableName, vector<condition> option);
 // 以上两个函数接口不予暴露
 string select_api(string tableName, vector<string> attrList, vector<condition> options);
 int drop_table_api(string tableName);
+string create_index_api(string tableName, string attr, string indexName);
+int drop_index_api(string indexName);
 
 #endif // !_API_H_

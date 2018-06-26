@@ -798,6 +798,13 @@ string DropIndex(string sql)
 			cerr << "语法错误：drop index:无法确定的索引名" << endl;
 			return "99";
 		}
+		trim(tableName);
+		int result = drop_index_api(tableName);
+		if (result == 1)
+		{
+			cerr << "drop index错误：查无此索引" << endl;
+			return "99";
+		}
 		cout << "删除索引" << tableName << "成功" << endl;
 		sql = "80";
 	}
@@ -1417,9 +1424,11 @@ string CreateIndex(string sql)
 		return "99";
 	}
 	cout << indexName << " " << table << " " << attr << endl;
-	/*---*/
-	sql = "80";
+	string result = create_index_api(table, attr, attr);
+	sql = result;
 	return sql;
 }
+
+
 
 
