@@ -82,15 +82,15 @@ int data_dictionary::delete_column(m_string tableName,m_string columnName) {
 }
 int data_dictionary::add_index(m_string tableName, m_string indexName,m_string name)
 {
-
-	FILE *fp;
-	fp = fopen("./index.dat","wb+");
-	fwrite(tableName.str, sizeof(char), 256, fp);
-	fwrite(indexName.str, sizeof(char), 256, fp);
-	fwrite(name.str, sizeof(char), 256, fp);
-	fclose(fp);
-
 	database *db = this->db;
+	int totalIndex = 0;
+	for (int i = 0; i < db->tableNum; i++) {
+		totalIndex += db->tables[i]->index_num;
+	}
+	FILE *fp;
+	
+
+
 	int rs = 0; int t = 0;
 	table tb;
 	//检查表是否存在
@@ -105,8 +105,13 @@ int data_dictionary::add_index(m_string tableName, m_string indexName,m_string n
 	if (rs == 0) return 1;
 	//检查索引是否存在
 	rs = 0;
-	for (int i = 0; i < tb.index_num; i++) {
-		if (tb.index_names[i] == indexName) {
+	fp = fopen("./index.dat", "rb");
+	m_string tableName1, colName1, _name;
+	for (int i = 0; i < totalIndex; i++) {
+		fread(tableName1.str, sizeof(char), 256, fp);
+		fread(colName1.str, sizeof(char), 256, fp);
+		fread(_name.str, sizeof(char), 256, fp);
+		if (name == _name) {
 			rs = 1;
 			break;
 		}
@@ -123,6 +128,11 @@ int data_dictionary::add_index(m_string tableName, m_string indexName,m_string n
 	}
 	if (rs == 0)return 3;
 	//插入新索引
+	fp = fopen("./index.dat", "wb+");
+	fwrite(tableName.str, sizeof(char), 256, fp);
+	fwrite(indexName.str, sizeof(char), 256, fp);
+	fwrite(name.str, sizeof(char), 256, fp);
+	fclose(fp);
 
 	m_string *indexes = new m_string[tb.index_num + 1];
 	for (int i = 0; i < tb.index_num ; i++) {
@@ -207,7 +217,9 @@ void data_dictionary::build_dictionary() {
 }
 void data_dictionary::listTable() {
 	database *db = this->db;
+
 	for (int i = 0; i < db->tableNum; i++) {
+		int rs = 0;
 		table tb = *db->tables[i];
 		cout.setf(std::ios::left);
 		cout << "表名:" << tb.table_name << endl << endl;
@@ -251,11 +263,25 @@ void data_dictionary::listTable() {
 			cout << col.data_type;
 			cout.width(10);
 			cout << col.data_size;
+			
 			cout.width(10);
-			cout << tb.index_num;
+			if (rs == 0) {
+				cout << tb.index_num;
+			}
+			else {
+				cout << "-";
+			}
+		
 			for (int i = 0; i < tb.index_num; i++) {
 				cout.width(10);
-				cout << tb.index_names[i];
+				if (rs == 0) {
+					cout << tb.index_names[i];
+					rs = 1;
+				}
+				else {
+					cout << "-";
+				}
+		
 			}		
 			cout.width(10);
 			cout << s3;
