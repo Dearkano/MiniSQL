@@ -5,7 +5,7 @@ class database
 public:
 	database();
 	~database();
-	table *tables;
+	table **tables;
 	int tableNum;
 };
 
