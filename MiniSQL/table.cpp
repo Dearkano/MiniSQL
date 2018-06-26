@@ -1,6 +1,9 @@
 #include "table.h"
 #include <stdlib.h>;
-table::table() {}
+table::table() {
+	columns = new column[15];
+	index_names = new m_string[15];
+}
 
 table::table(m_string table_name, int column_num, int row_num, column *columns, int index_num, m_string *index_names)
 {
@@ -15,4 +18,6 @@ table::table(m_string table_name, int column_num, int row_num, column *columns, 
 
 table::~table()
 {
+	//delete index_names;
+	//delete columns;
 }

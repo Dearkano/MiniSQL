@@ -310,6 +310,7 @@ string select_api(string tableName, vector<string> attrList, vector<condition> o
 					cout << result->rows[i]->data[j] << "\t\t";
 				cout << endl;
 			}
+			result = NULL;
 		}
 		else
 		{
