@@ -106,15 +106,15 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 					ss << value;
 					ss >> v;
 					if (isInt&&n == v) {
-						newData[r] = data[i];rowIds[r++]=i;
+						newData[r] = data[i]; rowIds[r++] = i;
 					}
 					else if (isFloat&&f == v) {
-						newData[r] = data[i];rowIds[r++]=i;
+						newData[r] = data[i]; rowIds[r++] = i;
 					}
 				}
 				else {
 					if (strcmp(value.str, data[i][c].str) == 0)
-						newData[r] = data[i];rowIds[r++]=i;
+						newData[r] = data[i]; rowIds[r++] = i;
 				}
 				break;
 			case'>':
@@ -140,7 +140,7 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 					if (data[i][c] > value) {
 						newData[r] = data[i]; rowIds[r++] = i;
 					}
-					}
+				}
 				break;
 			case'<':
 				if (isInt || isFloat) {
@@ -227,15 +227,15 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 					ss << value;
 					ss >> v;
 					if (isInt&&n != v) {
-						newData[r] = data[i];rowIds[r++]=i;
+						newData[r] = data[i]; rowIds[r++] = i;
 					}
 					else if (isFloat&&f != v) {
-						newData[r] = data[i];rowIds[r++]=i;
+						newData[r] = data[i]; rowIds[r++] = i;
 					}
 				}
 				else {
 					if (strcmp(value.str, data[i][c].str) != 0)
-						newData[r] = data[i];rowIds[r++]=i;
+						newData[r] = data[i]; rowIds[r++] = i;
 				}
 				break;
 			}
@@ -274,12 +274,12 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 			tb->rows[i]->id = rowIds[i];
 		}
 		tb->column_num = columnNum;
-	/*	free(data);
-		free(newData);*/
+		/*	free(data);
+			free(newData);*/
 
-	/*	for (int i = 0; i < tb->row_num; i++) {
-			delete []newData[i];
-		}*/
+			/*	for (int i = 0; i < tb->row_num; i++) {
+					delete []newData[i];
+				}*/
 		return tb;
 	}
 
@@ -376,7 +376,7 @@ temp_row record_manager::select_row(m_string tableName, m_string column, m_strin
 	}
 	temp_row *tt = new temp_row();
 	tt->num = -1;
-	if (rs == 0) return *tt ;
+	if (rs == 0) return *tt;
 	real_buffer_manager r;
 	m_string ** data = r.read_table(tb->table_name, tb->row_num, tb->column_num);
 
@@ -390,7 +390,15 @@ temp_row record_manager::select_row(m_string tableName, m_string column, m_strin
 	tt->num = -2;
 	if (c == -1)return *tt;
 	int count = 0;
-	int *res=new int[1000];
+	int *res = new int[1000];
+	if (opt == 0) {
+		for (int i = 0; i < tb->row_num; i++)
+			res[i] = i;
+		temp_row *tt= new temp_row();
+		tt->row = res;
+		tt->num = tb->row_num;
+		return* tt;
+	}
 	for (int i = 0; i < tb->row_num; i++) {
 		switch (opt) {
 		case '=':
@@ -439,8 +447,8 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 			break;
 		}
 	}
-	
-	if(rs==0) return -1;
+
+	if (rs == 0) return -1;
 	real_buffer_manager b;
 	if (opt == ' ') {
 		string str(tableName.str);
@@ -449,7 +457,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 		b.create_dbFile(mstr);
 		int count = db->tables[t]->row_num;
 		db->tables[t]->row_num = 0;
-	//	this->dict.delete_table(tableName);
+		//	this->dict.delete_table(tableName);
 		this->dict.update_database();
 		return count;
 	}
@@ -478,7 +486,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 		m_string s;
 		stringstream ss;
 		int n, v;
-		float f,f1;
+		float f, f1;
 		switch (opt) {
 		case '=':
 			if (isInt || isFloat) {
@@ -490,8 +498,8 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 					ss >> f;
 				ss.clear();
 				ss << value;
-				if(isInt==1)
-				ss >> v;
+				if (isInt == 1)
+					ss >> v;
 				if (isFloat == 1)
 					ss >> f1;
 				if (isInt&&n == v) {
@@ -554,7 +562,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 				}
 			}
 			else {
-				if (data[i][c]>value) {
+				if (data[i][c] > value) {
 					tb->row_num--;
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
@@ -596,7 +604,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 				}
 			}
 			else {
-				if (data[i][c]<value) {
+				if (data[i][c] < value) {
 					tb->row_num--;
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
@@ -638,7 +646,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 				}
 			}
 			else {
-				if (data[i][c]>=value) {
+				if (data[i][c] >= value) {
 					tb->row_num--;
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
@@ -680,7 +688,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 				count++;
 			}
 			else {
-				if (data[i][c]<=value) {
+				if (data[i][c] <= value) {
 					tb->row_num--;
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
@@ -702,7 +710,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 				ss.clear();
 				ss << value;
 				if (isInt == 1)
-				ss >> v;
+					ss >> v;
 				if (isFloat == 1)
 					ss >> f1;
 				if (isInt&&n != v) {
@@ -752,7 +760,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 	return count;
 }
 
-temp_row mix(temp_row tr1,temp_row tr2) {
+temp_row mix(temp_row tr1, temp_row tr2) {
 	int i = 0;
 	int j = 0;
 	int k = 0;
@@ -765,9 +773,9 @@ temp_row mix(temp_row tr1,temp_row tr2) {
 			i++;
 			j++;
 		}
-		else if (tr1.row[i]>tr2.row[j])
+		else if (tr1.row[i] > tr2.row[j])
 			j++;
-		else if (tr1.row[i]<tr2.row[j])
+		else if (tr1.row[i] < tr2.row[j])
 			i++;
 	}
 	temp_row * tr = new temp_row();
@@ -776,7 +784,7 @@ temp_row mix(temp_row tr1,temp_row tr2) {
 	return *tr;
 }
 
-int record_manager::_delete_2(m_string tableName,int opt_num,m_string column_name[],m_string value[],char opt[] )
+int record_manager::_delete_2(m_string tableName, int opt_num, m_string column_name[], m_string value[], char opt[])
 {
 
 	database *db = this->dict.db;
@@ -821,23 +829,23 @@ int record_manager::_delete_2(m_string tableName,int opt_num,m_string column_nam
 	if (rs == 0)return 1;
 	int p = 0;
 	int j = 0;
-		for (int i = 0; i < db->tables[t]->row_num; i++) {
-	
-			if (rows[j] == i) {
-				j++;
-			}
-			else {
-				newData[p++] = data[i];
-			}
+	for (int i = 0; i < db->tables[t]->row_num; i++) {
+
+		if (rows[j] == i) {
+			j++;
 		}
-		b.update_table(tb->table_name, newData, p, tb->column_num);
-		this->dict.db->tables[t]->row_num = p;
-		this->dict.update_database();
+		else {
+			newData[p++] = data[i];
+		}
+	}
+	b.update_table(tb->table_name, newData, p, tb->column_num);
+	this->dict.db->tables[t]->row_num = p;
+	this->dict.update_database();
 	return p;
 }
-table* record_manager::select_2(m_string tableName, int opt_num, m_string column_name[], m_string value[], char opt[], m_string res_name[],int col_num)
+table* record_manager::select_2(m_string tableName, int opt_num, m_string column_name[], m_string value[], char opt[], m_string res_name[], int col_num)
 {
-	
+
 	database *db = this->dict.db;
 	int rs = 0;
 	table *tb = new table();
@@ -849,7 +857,7 @@ table* record_manager::select_2(m_string tableName, int opt_num, m_string column
 			rs = 1;
 			break;
 		}
-	} 
+	}
 	if (rs == 0) {
 		tb->isError = 1;
 		return tb;
@@ -858,15 +866,19 @@ table* record_manager::select_2(m_string tableName, int opt_num, m_string column
 	m_string **data1 = b.read_table(tb->table_name, tb->row_num, tb->column_num);
 	m_string **data = new m_string*[tb->row_num];
 	for (int i = 0; i < tb->row_num; i++) data[i] = data1[i];
-
-
-	temp_row tr1 = this->select_row(tb->table_name, column_name[0], value[0], opt[0]);
 	temp_row *tr = new temp_row();
-	for (int i = 1; i < opt_num; i++) {
-		temp_row tr2 = this->select_row(tb->table_name, column_name[i], value[i], opt[i]);
-		*tr = mix(tr1, tr2);
-		tr1.num = tr->num;
-		tr1.row = tr->row;
+	if (opt_num != 0) {
+		temp_row tr1 = this->select_row(tb->table_name, column_name[0], value[0], opt[0]);
+		
+		for (int i = 1; i < opt_num; i++) {
+			temp_row tr2 = this->select_row(tb->table_name, column_name[i], value[i], opt[i]);
+			*tr = mix(tr1, tr2);
+			tr1.num = tr->num;
+			tr1.row = tr->row;
+		}
+	}
+	else {
+		*tr = this->select_row(tb->table_name);
 	}
 
 	int row_num = tr->num;
@@ -882,12 +894,12 @@ table* record_manager::select_2(m_string tableName, int opt_num, m_string column
 	else
 		_table->column_num == col_num;
 
-		//select *
-	if (col_num==-1) {
+	//select *
+	if (col_num == -1) {
 		int p = 0;
 		for (int i = 0; i < tb->row_num; i++) {
 			if (i == rows[p]) {
-				_table->rows[p++] = new row(data[i],tb->column_num);
+				_table->rows[p++] = new row(data[i], tb->column_num);
 			}
 		}
 	}
@@ -907,7 +919,7 @@ table* record_manager::select_2(m_string tableName, int opt_num, m_string column
 		int p = 0;
 		for (int i = 0; i < tb->row_num; i++) {
 			if (i == rows[p]) {
-				_table->rows[p++] = new row(data[i], col_num,colId);
+				_table->rows[p++] = new row(data[i], col_num, colId);
 			}
 		}
 	}
@@ -967,7 +979,7 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 			m_string s;
 			stringstream ss;
 			int n, v;
-			float f,f1;
+			float f, f1;
 			switch (opt) {
 			case '=':
 				if (isInt || isFloat) {
@@ -980,7 +992,7 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 					ss.clear();
 					ss << value2;
 					if (isInt == 1)
-					ss >> v;
+						ss >> v;
 					if (isFloat == 1)
 						ss >> f1;
 					if (isInt&&n == v) {
@@ -1006,7 +1018,7 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 				ss.clear();
 				ss << value2;
 				if (isInt == 1)
-				ss >> v;
+					ss >> v;
 				if (isFloat == 1)
 					ss >> f1;
 				if (isInt&&n > v) {
@@ -1026,7 +1038,7 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 				ss.clear();
 				ss << value2;
 				if (isInt == 1)
-				ss >> v;
+					ss >> v;
 				if (isFloat == 1)
 					ss >> f1;
 				if (isInt&&n < v) {
@@ -1046,7 +1058,7 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 				ss.clear();
 				ss << value2;
 				if (isInt == 1)
-				ss >> v;
+					ss >> v;
 				if (isFloat == 1)
 					ss >> f1;
 				if (isInt&&n >= v) {
@@ -1066,7 +1078,7 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 				ss.clear();
 				ss << value2;
 				if (isInt == 1)
-				ss >> v;
+					ss >> v;
 				if (isFloat == 1)
 					ss >> f1;
 				if (isInt&&n <= v) {
@@ -1088,7 +1100,7 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 					ss.clear();
 					ss << value2;
 					if (isInt == 1)
-					ss >> v;
+						ss >> v;
 					if (isFloat == 1)
 						ss >> f1;
 					if (isInt&&n != v) {
