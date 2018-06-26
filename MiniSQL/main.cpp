@@ -131,15 +131,12 @@ int main()
 }
 
 //int main() {
-//	record_manager rc;
-//	m_string m_tableName("book");
-//	m_string att("*");
-//	m_string *attr = new m_string[1]{ att };
-//	int columnNum = 1;
-//	for (int i = 0; i < 100; i++) {
-//		table* result = rc.select(m_tableName, attr, columnNum);
-//		cout << "µÚ" << i << "´Î" << endl;
-//	}
 //	
+//	data_dictionary d;
+//	m_string tableName("book");
+//	m_string colName("bno");
+//	m_string name("index1");
+//	//d.add_index(tableName, colName, name);
+//	d.listTable();
 //	system("pause");
 //}

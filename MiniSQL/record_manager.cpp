@@ -118,72 +118,100 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 				}
 				break;
 			case'>':
-				s = data[i][c].str;
-				ss << s;
-				if (isInt == 1)
-					ss >> n;
-				if (isFloat == 1)
-					ss >> f;
-				ss.clear();
-				ss << value;
-				ss >> v;
+				if (isInt || isFloat) {
+					s = data[i][c].str;
+					ss << s;
+					if (isInt == 1)
+						ss >> n;
+					if (isFloat == 1)
+						ss >> f;
+					ss.clear();
+					ss << value;
+					ss >> v;
 
-				if (isInt&&n > v) {
-					newData[r] = data[i];rowIds[r++]=i;
+					if (isInt&&n > v) {
+						newData[r] = data[i]; rowIds[r++] = i;
+					}
+					else if (isFloat&&f > v) {
+						newData[r] = data[i]; rowIds[r++] = i;
+					}
 				}
-				else if (isFloat&&f > v) {
-					newData[r] = data[i];rowIds[r++]=i;
-				}
+				else {
+					if (data[i][c] > value) {
+						newData[r] = data[i]; rowIds[r++] = i;
+					}
+					}
 				break;
 			case'<':
-				s = data[i][c].str;
-				ss << s;
-				if (isInt == 1)
-					ss >> n;
-				if (isFloat == 1)
-					ss >> f;
-				ss.clear();
-				ss << value;
-				ss >> v;
-				if (isInt&&n < v) {
-					newData[r] = data[i];rowIds[r++]=i;
+				if (isInt || isFloat) {
+					s = data[i][c].str;
+					ss << s;
+					if (isInt == 1)
+						ss >> n;
+					if (isFloat == 1)
+						ss >> f;
+					ss.clear();
+					ss << value;
+					ss >> v;
+					if (isInt&&n < v) {
+						newData[r] = data[i]; rowIds[r++] = i;
+					}
+					else if (isFloat&&f < v) {
+						newData[r] = data[i]; rowIds[r++] = i;
+					}
 				}
-				else if (isFloat&&f < v) {
-					newData[r] = data[i];rowIds[r++]=i;
+				else {
+					if (data[i][c] < value) {
+						newData[r] = data[i]; rowIds[r++] = i;
+					}
 				}
 				break;
 			case'g':
-				s = data[i][c].str;
-				ss << s;
-				if (isInt == 1)
-					ss >> n;
-				if (isFloat == 1)
-					ss >> f;
-				ss.clear();
-				ss << value;
-				ss >> v;
-				if (isInt&&n >= v) {
-					newData[r] = data[i];rowIds[r++]=i;
+				if (isInt || isFloat) {
+					s = data[i][c].str;
+					ss << s;
+					if (isInt == 1)
+						ss >> n;
+					if (isFloat == 1)
+						ss >> f;
+					ss.clear();
+					ss << value;
+					ss >> v;
+					if (isInt&&n >= v) {
+						newData[r] = data[i]; rowIds[r++] = i;
+					}
+					else if (isFloat&&f >= v) {
+						newData[r] = data[i]; rowIds[r++] = i;
+					}
 				}
-				else if (isFloat&&f >= v) {
-					newData[r] = data[i];rowIds[r++]=i;
+				else {
+					if (data[i][c] >= value) {
+						newData[r] = data[i]; rowIds[r++] = i;
+					}
 				}
 				break;
 			case'l':
-				s = data[i][c].str;
-				ss << s;
-				if (isInt == 1)
-					ss >> n;
-				if (isFloat == 1)
-					ss >> f;
-				ss.clear();
-				ss << value;
-				ss >> v;
-				if (isInt&&n <= v) {
-					newData[r] = data[i];rowIds[r++]=i;
+				if (isInt || isFloat) {
+					s = data[i][c].str;
+					ss << s;
+					if (isInt == 1)
+						ss >> n;
+					if (isFloat == 1)
+						ss >> f;
+					ss.clear();
+					ss << value;
+					ss >> v;
+					if (isInt&&n <= v) {
+						newData[r] = data[i]; rowIds[r++] = i;
+					}
+					else if (isFloat&&f <= v) {
+						newData[r] = data[i]; rowIds[r++] = i;
+					}
 				}
-				else if (isFloat&&f <= v) {
-					newData[r] = data[i];rowIds[r++]=i;
+				else {
+					if (data[i][c] <= value) {
+						newData[r] = data[i]; rowIds[r++] = i;
+					}
 				}
 				break;
 			case'!':
