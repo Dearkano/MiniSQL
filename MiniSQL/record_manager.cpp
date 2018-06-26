@@ -222,6 +222,7 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 	if (columnNum == 1 && strcmp(columns[0].str, "*") == 0) {
 		for (int i = 0; i < tb->row_num; i++) {
 			tb->rows[i] = new row(newData[i], tb->column_num);
+			tb->rows[i]->id = i;
 		}
 		//free(data);
 
