@@ -245,8 +245,8 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 			tb->rows[i]->id = i;
 		}
 		tb->column_num = columnNum;
-		free(data);
-		free(newData);
+	/*	free(data);
+		free(newData);*/
 		return tb;
 	}
 
