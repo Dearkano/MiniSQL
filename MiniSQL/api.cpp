@@ -4,7 +4,7 @@
 #include <set>
 #include <algorithm>
 #include"IndexManager.h"
-
+#define DEBUG
 IndexManager im;
 
 int create_table_api(InterTable newTable)
@@ -413,4 +413,104 @@ int drop_table_api(string tableName)
 	m_string m_tableName(tableName.c_str());
 	int result = rc.drop_table(m_tableName);
 	return result;
+}
+
+string create_index_api(string tableName, string attr, string indexName)
+{
+	//----------//
+	data_dictionary dt;
+	database *db = dt.db;
+	int flag = -1;
+	for (int i = 0; i < db->tableNum; i++)
+	{
+		m_string temp(tableName.c_str());
+		if (db->tables[i]->table_name == temp)
+		{
+			flag = i;
+			break;
+		}
+	}
+	if (flag == -1)
+	{
+		cerr << "创建索引错误：没有此表" << endl;
+		return "99";
+	}
+	else
+	{
+		trim(attr);
+		string type;
+		if (!isLegalName(attr))
+		{
+			cerr << "创建索引错误：列名不合法" << endl;
+			return "99";
+		}
+		int i;
+		for (i = 0; i < db->tables[flag]->column_num; i++)
+		{
+			if (db->tables[flag]->columns[i].column_name.str == attr)
+			{
+				type = db->tables[flag]->columns[i].data_type.str;
+				break;
+			}
+		}
+		if (i >= db->tables[flag]->column_num)
+		{
+			cerr << "创建索引错误：无此属性" << endl;
+			return "99";
+		}
+		if (type == "char")
+		{
+			try {
+				im.create_index(tableName + "$" + indexName, im.max_var_char);
+			}
+			catch (std::exception& e) {
+#ifdef DEBUG
+				cerr << e.what() << endl;
+#endif // DEBUG
+
+			}
+		}
+		else if (type == "int")
+		{
+			try {
+				im.create_index(tableName + "$" + indexName, im.type_int);
+			}
+			catch (std::exception& e) {
+#ifdef DEBUG
+				cerr << e.what() << endl;
+#endif // DEBUG
+
+			}
+		}
+		else if (type == "float")
+		{
+			try {
+				/*time_t t = time(NULL);
+				t = t % 100;
+				stringstream fuck;
+				fuck << t;
+				string shit;
+				fuck >> shit;*/
+				im.create_index(indexName, im.type_float);
+			}
+			catch (std::exception& e) {
+#ifdef DEBUG
+				cerr << e.what() << endl;
+#endif // DEBUG
+
+			}
+		}
+		else
+		{
+			cerr << "内部错误：错误的类型" << endl;
+			return "99";
+		}
+		return "80";
+	}
+}
+
+int drop_index_api(string indexName)
+{
+	im.drop_index(indexName);
+	return 0;
 }

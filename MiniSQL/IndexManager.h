@@ -2,6 +2,7 @@
 #define INDEX_MANAGER_H
 
 #include "BPTree.h"
+#include<time.h>
 #include <string>
 #include <cstring>
 #include <algorithm>
@@ -162,7 +163,15 @@ IndexManager::IndexManager() = default;
 IndexManager::~IndexManager() = default;
 
 void IndexManager::create_index(std::string index_name, int type_indicator) {
-    auto it = type_reminder.find(index_name);
+	/*time_t t = time(NULL);
+	t = t % 100;
+	stringstream fuck;
+	fuck << t;
+	string shit;
+	fuck >> shit;
+	index_name = index_name + shit;
+    */
+	auto it = type_reminder.find(index_name);
     if (it != type_reminder.end()) {
         throw DuplicateIndex();
         return;
