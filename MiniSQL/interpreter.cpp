@@ -2,7 +2,7 @@
 #include "table.h"
 #include "record_manager.h"
 #include "api.h"
-
+#include <fstream>
 
 bool isLegalName(string a)
 {
@@ -12,7 +12,7 @@ bool isLegalName(string a)
 		return false;
 	}
 	 // string illgal = "{}[]/<>~`\"\\|:\?";
-	string illgalForName = "{}[]/<>~`\"\\|:\';+-=!@#$%%^&*\? "; // 取名不能使用的字符
+	string illgalForName = "{}[]/<>~`\"\\|:\';+-=!@#$%%^&*\?() "; // 取名不能使用的字符
 	for (int i = 0; i < a.length(); i++)
 	{
 		if (illgalForName.find(a[i]) != -1)
@@ -139,11 +139,13 @@ string Input()
 	string sql = "";
 	string temp;
 	bool finish = false;
-	cout << "sql/> ";
+	cout << ">>> ";
 	while (!finish)
 	{
 		getline(cin, temp);
 		trim(temp);
+		if (temp.length() == 0)
+			continue;
 		if (temp[temp.length() - 1] == ';')
 		{
 			temp[temp.length() - 1] = ' ';
@@ -154,10 +156,67 @@ string Input()
 		else
 		{
 			sql += (temp + " ");
-			cout << "> ";
+			cout << ">>> ";
 		}
 	}
 	return sql;
+}
+
+string ExecFile(string path)
+{
+	int find = path.find("execfile");
+	find += 8;
+	path = path.substr(find);
+	cout << path << endl;
+	if (path.empty())
+	{
+		cerr << "语法错误：空路径" << endl;
+		return "99";
+	}
+	string fileName = path;
+	trim(fileName);
+	while (fileName[fileName.length() - 1] == ';')
+	{
+		fileName.erase(fileName.end() - 1);
+	}
+	trim(fileName);
+	ifstream inf(".\\sql\\" + fileName);
+	// 表征文件行数
+	int line = 1;
+	if (!inf.is_open())
+	{
+		cout << "打开文件时发生错误!" << endl;
+		return "99";
+	}
+	string sql = "";
+	string temp;
+	while (!inf.eof())
+	{
+		getline(inf, temp);
+		trim(temp);
+		if (temp[temp.length() - 1] == ';')
+		{
+			temp[temp.length() - 1] = ' ';
+			temp += ";";
+			sql += temp;
+			string result = Interpreter(sql);
+			if (result == "80")
+			{
+				// 清空当前sql语句
+				sql = "";
+			}
+			else if (result == "99")
+			{
+				cerr << "脚本执行失败!问题语句结束于第" << line << "行" << endl;
+				return "99";
+			}
+		}
+		else
+			sql += (temp + " ");
+		line++;
+	}
+	cout << "脚本执行成功" << endl;
+	return "80";
 }
 // 分类阐释器
 string Interpreter(string statement)
@@ -182,15 +241,17 @@ string Interpreter(string statement)
 	}
 	// 若为正常语句
 	else if (temp == "create")
-		   sql = Create(sql);
+		sql = Create(sql);
 	else if (temp == "drop")
-			sql = Drop(sql);
+		sql = Drop(sql);
 	else if (temp == "select")
 		sql = Select(sql);
 	else if (temp == "insert")
 		sql = Insert(sql);
 	else if (temp == "delete")
 		sql = Delete(sql);
+	else if (temp == "execfile")
+		sql = ExecFile(sql);
 	// 如果是非法语句
 	else
 	{
@@ -252,9 +313,7 @@ string Create(string sql)
 	}
 	else if (keyWord == "index")
 	{
-		 // sql = CreateIndex(sql);
-		cout << "create index" << endl;
-		sql = "80";
+		sql = CreateIndex(sql);
 	}
 	else
 	{
@@ -685,7 +744,13 @@ string DropTable(string sql)
 			cerr << "语法错误：drop table:无法确定的表名" << endl;
 			return "99";
 		}
-
+		trim(tableName);
+		int result = drop_table_api(tableName);
+		if (result == 1)
+		{
+			cerr << "drop table错误：查无此表" << endl;
+			return "99";
+		}
 		cout << "删除表" << tableName << "成功" << endl;
 		sql = "80";
 	}
@@ -1208,9 +1273,9 @@ vector<condition> WhereSplit(string input)
 		int find3 = codList[i].find("=");
 		int find4 = codList[i].find(">=");
 		int find5 = codList[i].find("<=");
-		int find6 = codList[i].find("!=");
+		int find6 = codList[i].find("<>");
 		// 单纯小于
-		if (find1 != string::npos && find5 == string::npos)
+		if (find1 != string::npos && find5 == string::npos && find6 == string::npos)
 		{
 			string attrName = codList[i].substr(0, find1);
 			string condition = codList[i].substr(find1);
@@ -1224,7 +1289,7 @@ vector<condition> WhereSplit(string input)
 			// 
 		}
 		// 单纯大于
-		else if (find2 != string::npos && find4 == string::npos)
+		else if (find2 != string::npos && find4 == string::npos && find6 == string::npos)
 		{
 			string attrName = codList[i].substr(0, find2);
 			string condition = codList[i].substr(find2);
@@ -1297,3 +1362,64 @@ vector<condition> WhereSplit(string input)
 	}
 	return temp;
 }
+
+string CreateIndex(string sql)
+{
+	// 进入函数的语句应当是create index
+	string preSql = sql;
+	int find = sql.find("on");
+	if (find == string::npos)
+	{
+		cerr << "语法错误：缺少“on”" << endl;
+		return "99";
+	}
+	int findPre = sql.find("index");
+	findPre += 5;
+	string indexName = sql.substr(findPre, find - findPre);
+	trim(indexName);
+	if (indexName.length() == 0)
+	{
+		cerr << "语法错误:未指明索引名" << endl;
+		return "99";
+	}
+	if (!isLegalName(indexName))
+	{
+		cerr << "语法错误：非法的索引名" << endl;
+		return "99";
+	}
+	sql = sql.substr(find + 2);
+	trim(sql);
+	// 将 on 去掉；
+	find = sql.find(";");
+	string tableAttr = sql.substr(0, find);
+	trim(tableAttr);
+	if (tableAttr.length() == 0)
+	{
+		cerr << "语法错误:未指明索引目标" << endl;
+		return "99";
+	}
+	// 处理表名和列
+	int find1 = tableAttr.find("(");
+	int find2 = tableAttr.find(")");
+	if (find1 == string::npos || find2 == string::npos || find1 > find2)
+	{
+		cerr << "语法错误：括号不闭合" << endl;
+		return "99";
+	}
+	string table = tableAttr.substr(0, find1);
+	string attr = tableAttr.substr(find1, find2 - find1);
+	attr.erase(attr.begin());
+	trim(table);
+	trim(attr);
+	if (!(isLegalName(table)) || (!isLegalName(attr)))
+	{
+		cerr << "语法错误：非法的表名或列名" << endl;
+		return "99";
+	}
+	cout << indexName << " " << table << " " << attr << endl;
+	/*---*/
+	sql = "80";
+	return sql;
+}
+
+

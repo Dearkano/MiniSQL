@@ -188,7 +188,7 @@ int delete_from_api(string tableName, vector<condition> option)
 // 只有一个结果
 table* select_from_api(string tableName, vector<string> attrList, condition opt)
 {
-	m_string attr[50];
+	m_string attr[15];
 	int columnNum;
 	if (attrList.empty())
 	{
@@ -260,7 +260,7 @@ table* select_from_api(string tableName, vector<string> attrList, condition opt)
 // 重载函数：没有条件的单约束情况
 table* select_from_api(string tableName, vector<string> attrList)
 {
-	m_string attr[50];
+	m_string attr[15];
 	int columnNum;
 	if (attrList.empty())
 	{
@@ -273,7 +273,7 @@ table* select_from_api(string tableName, vector<string> attrList)
 		for (int i = 0; i < columnNum; i++)
 		{
 			trim(attrList[i]);
-			strcpy(attr[i].str, attrList[i].c_str());
+			attr[i] = m_string(attrList[i].c_str());
 		}
 	}
 	record_manager rc;
@@ -388,12 +388,12 @@ string select_api(string tableName, vector<string> attrList, vector<condition> o
 		}
 		
 		for (int i = 0; i < attr.size(); i++)
-			cout << attr[i] << "\t\t\t|";
+			cout << attr[i] << "\t\t";
 		cout << endl;
 		for (int i = 0; i < all.size(); i++)
 		{
 			for (int j = 0; j < all[i].size(); j++)
-				cout << all[i][j] << "\t\t\t|";
+				cout << all[i][j] << "\t\t";
 			cout << endl;
 		}
 
@@ -405,7 +405,8 @@ string select_api(string tableName, vector<string> attrList, vector<condition> o
 
 int drop_table_api(string tableName)
 {
+	record_manager rc;
 	m_string m_tableName(tableName.c_str());
-	return 0;
-
+	int result = rc.drop_table(m_tableName);
+	return result;
 }
