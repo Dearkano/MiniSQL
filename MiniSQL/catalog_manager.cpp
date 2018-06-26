@@ -80,8 +80,16 @@ int data_dictionary::delete_column(m_string tableName,m_string columnName) {
 	}
 	return 1;
 }
-int data_dictionary::add_index(m_string tableName, m_string indexName)
+int data_dictionary::add_index(m_string tableName, m_string indexName,m_string name)
 {
+
+	FILE *fp;
+	fp = fopen("./index.dat","wb+");
+	fwrite(tableName.str, sizeof(char), 256, fp);
+	fwrite(indexName.str, sizeof(char), 256, fp);
+	fwrite(name.str, sizeof(char), 256, fp);
+	fclose(fp);
+
 	database *db = this->db;
 	int rs = 0; int t = 0;
 	table tb;
@@ -128,9 +136,28 @@ int data_dictionary::add_index(m_string tableName, m_string indexName)
 	this->db = new database();
 	return 0;
 }
-int data_dictionary::delete_index(m_string tableName, m_string indexName)
+int data_dictionary::delete_index(m_string name)
 {
 	database *db = this->db;
+	int totalIndex=0;
+	for (int i = 0; i < db->tableNum; i++) {
+		totalIndex += db->tables[i]->index_num;
+	}
+	FILE *fp;
+	fp = fopen("./index.dat", "rb");
+	m_string tableName, colName, _name;
+	for (int i = 0; i < totalIndex; i++) {
+		fread(tableName.str, sizeof(char), 256, fp);
+		fread(colName.str, sizeof(char), 256, fp);
+		fread(_name.str, sizeof(char), 256, fp);
+		if (name == _name) {
+			break;
+		}
+	}
+	m_string indexName = colName;
+
+
+
 	int rs = 0; int t = 0;
 	table tb;
 	//检查表是否存在
@@ -390,7 +417,7 @@ void test_add_index() {
 	strcpy(tableName.str, "table1");
 	strcpy(indexName.str, "name");
 	data_dictionary d;
-	int rs = d.add_index(tableName, indexName);
+	int rs = d.add_index(tableName, indexName,indexName);
 	if (rs == 0) {
 		cout << "添加索引成功" << endl;
 	}
@@ -412,7 +439,7 @@ void test_delete_index() {
 	strcpy(tableName.str, "table1");
 	strcpy(indexName.str, "name");
 	data_dictionary d;
-	int rs = d.delete_index(tableName, indexName);
+	int rs = d.delete_index(tableName);
 	if (rs == 0) {
 		cout << "删除索引成功" << endl;
 	}

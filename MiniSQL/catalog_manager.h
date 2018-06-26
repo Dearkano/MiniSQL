@@ -24,9 +24,9 @@ public:
 	//删除列 0：成功 1：表不存在 2 列不存在
 	int delete_column(m_string tableName, m_string columnName);
 	//添加索引 0：成功 1：表不存在 2：索引已经存在 3：列不存在
-	int add_index(m_string tableName, m_string indexName );
+	int add_index(m_string tableName, m_string indexName,m_string name );
 	//删除索引  0：成功 1：表不存在 2：索引不存在
-	int delete_index(m_string tableName, m_string indexName);
+	int delete_index(m_string name);
 	//打印所有的表定义
 	void listTable();
 	//返回是否是主键或者唯一
