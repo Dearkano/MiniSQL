@@ -639,7 +639,41 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 	tb = NULL;
 	return count;
 }
-
+int record_manager::_delete_2(m_string tableName, int *rows,int row_num)
+{
+	database *db = this->dict.db;
+	real_buffer_manager b;
+	table *tb = new table();
+	int rs = 0;
+	int t;
+	
+	for (int i = 0; i < db->tableNum; i++) {
+		if (tableName == db->tables[i]->table_name) {
+			tb = db->tables[i];
+			t = i;
+			rs = 1;
+			break;
+		}
+	}
+	m_string **data = b.read_table(tb->table_name, tb->row_num, tb->column_num);
+	m_string **newData = new m_string*[tb->row_num - row_num];
+	if (rs == 0)return 1;
+	int p = 0;
+	int j = 0;
+		for (int i = 0; i < db->tables[t]->row_num; i++) {
+	
+			if (rows[j] == i) {
+				j++;
+			}
+			else {
+				newData[p++] = data[i];
+			}
+		}
+		b.update_table(tb->table_name, newData, p, tb->column_num);
+		this->dict.db->tables[t]->row_num = p;
+		this->dict.update_database();
+	return p;
+}
 int record_manager::update(m_string tableName, m_string column1, m_string value1, m_string column2, m_string value2, char opt)
 {
 	database *db = this->dict.db;

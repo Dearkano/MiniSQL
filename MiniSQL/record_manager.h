@@ -39,6 +39,7 @@ public:
 	  -1:表不存在 -2：列不存在
 	*/
 	int _delete(m_string tableName, m_string column =m_string(""), m_string value=m_string("") ,char opt = ' ');
+	int _delete_2(m_string tableName, int *rows,int row_num);
 	/*
 	  update table1 set name = 'andy' where major = 'biology'
 	  =>
