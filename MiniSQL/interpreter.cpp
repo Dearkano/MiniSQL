@@ -685,6 +685,7 @@ string DropTable(string sql)
 			cerr << "语法错误：drop table:无法确定的表名" << endl;
 			return "99";
 		}
+
 		cout << "删除表" << tableName << "成功" << endl;
 		sql = "80";
 	}
@@ -826,6 +827,7 @@ string Delete(string sql)
 			// 其他错误
 			return "99";
 		}
+		cout << result << "行受影响" << endl;
 		return "80";
 	}
 	else

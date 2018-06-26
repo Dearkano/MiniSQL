@@ -2,6 +2,7 @@
 #include "real_buffer_manager.h"
 #include <cstring>
 #include <set>
+#include <algorithm>
 
 int create_table_api(InterTable newTable)
 {
@@ -132,9 +133,10 @@ int delete_from_api(string tableName, vector<condition> option)
 	/*enum COD { BIG, SMALL, EQUAL, NOTSMALL, NOTBIG, NOTEQUAL };*/
 	record_manager rc;
 	m_string m_tableName(tableName.c_str());
-	if (option.size() == 0)
+	if (option.empty())
 	{
-		return -3;
+		int result = rc._delete(m_tableName);
+		return result;
 	}
 	condition opt = option[0];
 	m_string optAttr(opt.attr.c_str()); //提取属性
@@ -297,14 +299,29 @@ string select_api(string tableName, vector<string> attrList, vector<condition> o
 			cerr << "查询成功，但没有匹配的数据" << endl;
 			return "80";
 		}
-		for (int i = 0; i < result->column_num; i++)
-			cout << result->columns[i].column_name << "\t\t";
-		cout << endl;
-		for (int i = 0; i < result->row_num; i++)
+		if (attrList.empty())
 		{
-			for (int j = 0; j < result->column_num; j++)
-				cout << result->rows[i]->data[j] << "\t\t";
+			for (int i = 0; i < result->column_num; i++)
+				cout << result->columns[i].column_name << "\t\t";
 			cout << endl;
+			for (int i = 0; i < result->row_num; i++)
+			{
+				for (int j = 0; j < result->column_num; j++)
+					cout << result->rows[i]->data[j] << "\t\t";
+				cout << endl;
+			}
+		}
+		else
+		{
+			for (int i = 0; i < result->column_num; i++)
+				cout << attrList[i] << "\t\t";
+			cout << endl;
+			for (int i = 0; i < result->row_num; i++)
+			{
+				for (int j = 0; j < result->column_num; j++)
+					cout << result->rows[i]->data[j] << "\t\t";
+				cout << endl;
+			}
 		}
 	}
 	// 需要进行条件弥合
@@ -312,6 +329,7 @@ string select_api(string tableName, vector<string> attrList, vector<condition> o
 	{
 		vector<string> attr;
 		vector<vector<string>> all;
+		vector<int> rowNumber;
  		table* temp = select_from_api(tableName, attrList, options[0]);
 		if (temp->isError == 1)
 		{
@@ -326,9 +344,9 @@ string select_api(string tableName, vector<string> attrList, vector<condition> o
 		for (int i = 0; i < temp->column_num; i++)
 			attr.push_back(temp->columns[i].column_name.str);
 		vector<vector<string>> ts;
-		for (int i = 0; i < options.size(); i++)
+		for (int k = 0; k < options.size(); k++)
 		{
-			table* result = select_from_api(tableName, attrList, options[i]);
+			table* result = select_from_api(tableName, attrList, options[k]);
 			if (result->isError == 1)
 			{
 				cerr << "查询错误：不存在的表名" << endl;
@@ -338,28 +356,53 @@ string select_api(string tableName, vector<string> attrList, vector<condition> o
 			{
 				vector<string> tv;
 				for (int j = 0; j < result->column_num; j++)
+				{
 					tv.push_back(result->rows[i]->data[j].str);
+				}
+				rowNumber.push_back(result->rows[i]->id);
 				ts.push_back(tv);
 			}
-			if (i == 0)
-				all = ts;
-			else
+		}
+		all.clear();
+		vector<int> stack;
+		for (int i = 0; i < ts.size(); i++)
+		{
+			if (rowNumber[i] >= 0 && count(rowNumber.begin(), rowNumber.end(), rowNumber[i]) >= options.size())
 			{
-				auto iter = set_intersection(all.begin(), all.end(), ts.begin(), ts.end(), all.begin());
-				all.resize(iter - all.begin());
+				all.push_back(ts[i]);
+				for (int j = i; j < ts.size(); j++)
+				{
+					if (rowNumber[j] == rowNumber[i])
+					{
+						rowNumber[j] = -1; //无效
+					}
+				}
 			}
-			ts.clear();
 		}
 		// 交集结束
+		if (all.empty())
+		{
+			cout << "查询成功，但无匹配数据" << endl;
+			return "80";
+		}
+		
 		for (int i = 0; i < attr.size(); i++)
-			cout << attr[i] << "\t\t";
+			cout << attr[i] << "\t\t\t|";
 		cout << endl;
 		for (int i = 0; i < all.size(); i++)
 		{
 			for (int j = 0; j < all[i].size(); j++)
-				cout << all[i][j] << "\t\t";
+				cout << all[i][j] << "\t\t\t|";
 			cout << endl;
 		}
 	}
 	return "80";
+}
+
+
+int drop_table_api(string tableName)
+{
+	m_string m_tableName(tableName.c_str());
+	return 0;
+
 }
