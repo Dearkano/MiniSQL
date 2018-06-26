@@ -327,6 +327,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 		string str(tableName.str);
 		m_string mstr(str);
 		b.delete_dbFile(mstr);
+		b.create_dbFile(mstr);
 		int count = db->tables[t].row_num;
 	//	this->dict.delete_table(tableName);
 	//	this->dict.update_database();
