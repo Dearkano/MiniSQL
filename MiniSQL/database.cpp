@@ -11,7 +11,7 @@ database::database()
 	FILE *fp;
 	fp = fopen("./data_dictionary.dat", "rb");
 	int table_num;
-	table *tables = (table*)malloc(10 * sizeof(table));
+	table **tables =new table*[10];
 	if (fp == NULL) {
 		fp = fopen("./data_dictionary.dat", "wb");
 		table_num = 0;
@@ -26,36 +26,32 @@ database::database()
 			fread(&columnNum, sizeof(int), 1, fp);
 			fread(&rowNum, sizeof(int), 1, fp);
 			fread(&indexNum, sizeof(int), 1, fp);
-			column *columns = (column*)malloc(columnNum * sizeof(column));
-			m_string *indexNames = (m_string*)malloc(indexNum * sizeof(m_string));
+			column *columns = new column[columnNum];
+			m_string *indexNames = new m_string[indexNum];
 			for (int i = 0; i < indexNum; i++) {
-				m_string s;
-				fread(s.str, sizeof(char), sizeof(m_string), fp);
-				indexNames[i] = s;
+				fread(indexNames[i].str, sizeof(char), sizeof(m_string), fp);
 			}
 			for (int j = 0; j < columnNum; j++) {
 				m_string columnName, dataType;
 				int size = 0, unique, isPrimaryKey;
-
 				fread(columnName.str, sizeof(char), sizeof(m_string), fp);
 				fread(dataType.str, sizeof(char), sizeof(m_string), fp);
 				fread(&size, sizeof(int), 1, fp);
 				fread(&unique, sizeof(int), 1, fp);
 				fread(&isPrimaryKey, sizeof(int), 1, fp);
-				column *col = new column(columnName, dataType, size, unique, isPrimaryKey);
-				columns[j] = *col;
+				columns[j] = *new column(columnName, dataType, size, unique, isPrimaryKey);
 			}
-			table *tb = new table(tableName, columnNum, rowNum, columns, indexNum, indexNames);
-			tables[i] = *tb;
+			tables[i] = new table(tableName, columnNum, rowNum, columns, indexNum, indexNames);
 		}
 	}
 	this->tables = tables;
-
 	this->tableNum = table_num;
+
 	fclose(fp);
 }
 
 
 database::~database()
 {
+	delete this->tables;
 }

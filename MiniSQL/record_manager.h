@@ -6,6 +6,7 @@
 class record_manager {
 public:
 	record_manager();
+	~record_manager() {}
 	data_dictionary dict;
 	/*
 	select(tableName,columnNames,columnNum,columnName?,operator?,value?)

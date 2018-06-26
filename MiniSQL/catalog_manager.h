@@ -7,7 +7,7 @@ using namespace std;
 class data_dictionary {
 public:
 	data_dictionary();
-	~data_dictionary() {}
+	~data_dictionary() { }
 	database *db;
 	//读取最新的数据字典到内存
 	void update();

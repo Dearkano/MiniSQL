@@ -49,8 +49,8 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 	real_buffer_manager r;
 	int rs = 0;
 	for (int i = 0; i < db->tableNum; i++) {
-		if (tableName == db->tables[i].table_name) {
-			*tb = db->tables[i];
+		if (tableName == db->tables[i]->table_name) {
+			tb = db->tables[i];
 			rs = 1;
 			break;
 		}
@@ -248,6 +248,10 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 		tb->column_num = columnNum;
 	/*	free(data);
 		free(newData);*/
+
+	/*	for (int i = 0; i < tb->row_num; i++) {
+			delete []newData[i];
+		}*/
 		return tb;
 	}
 
@@ -261,8 +265,8 @@ int record_manager::add(m_string tableName, m_string* newRow)
 	int rs = 0;
 	int t;
 	for (int i = 0; i < db->tableNum; i++) {
-		if (tableName == db->tables[i].table_name) {
-			*tb = db->tables[i];
+		if (tableName == db->tables[i]->table_name) {
+			tb = db->tables[i];
 			t = i;
 			rs = 1;
 			break;
@@ -298,7 +302,7 @@ int record_manager::add(m_string tableName, m_string* newRow)
 
 
 	//更新数据字典的行数
-	this->dict.db->tables[t].row_num++;
+	this->dict.db->tables[t]->row_num++;
 	this->dict.update_database();
 	delete tb;
 	tb = NULL;
@@ -311,8 +315,8 @@ int record_manager::drop_table(m_string tableName) {
 	int rs = 0;
 	int t;
 	for (int i = 0; i < db->tableNum; i++) {
-		if (tableName == db->tables[i].table_name) {
-			*tb = db->tables[i];
+		if (tableName == db->tables[i]->table_name) {
+			tb = db->tables[i];
 			t = i;
 			rs = 1;
 			break;
@@ -336,8 +340,8 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 	int rs = 0;
 	int t;
 	for (int i = 0; i < db->tableNum; i++) {
-		if (tableName == db->tables[i].table_name) {
-			*tb = db->tables[i];
+		if (tableName == db->tables[i]->table_name) {
+			tb = db->tables[i];
 			t = i;
 			rs = 1;
 			break;
@@ -351,8 +355,8 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 		m_string mstr(str);
 		b.delete_dbFile(mstr);
 		b.create_dbFile(mstr);
-		int count = db->tables[t].row_num;
-		db->tables[t].row_num = 0;
+		int count = db->tables[t]->row_num;
+		db->tables[t]->row_num = 0;
 	//	this->dict.delete_table(tableName);
 		this->dict.update_database();
 		return count;
@@ -596,7 +600,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 	data是新的文件
 	更新数据词典
 	*/
-	this->dict.db->tables[t].row_num = tb->row_num;
+	this->dict.db->tables[t]->row_num = tb->row_num;
 	this->dict.update_database();
 
 	//申请buffer manager将表更改后的内容存入硬盘
@@ -616,8 +620,8 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 	int rs = 0;
 	int t;
 	for (int i = 0; i < db->tableNum; i++) {
-		if (tableName == db->tables[i].table_name) {
-			*tb = db->tables[i];
+		if (tableName == db->tables[i]->table_name) {
+			tb = db->tables[i];
 			t = i;
 			rs = 1;
 			break;

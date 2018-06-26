@@ -48,7 +48,7 @@ int insert_into_api(vector<string> valueList, string tableName)
 	for (int i = 0; i < db->tableNum; i++)
 	{
 		m_string temp(tableName.c_str());
-		if (db->tables[i].table_name == temp)
+		if (db->tables[i]->table_name == temp)
 		{
 			flag = i;
 			break;
@@ -56,16 +56,16 @@ int insert_into_api(vector<string> valueList, string tableName)
 	}
 	if (flag != -1)
 	{
-		if (valueList.size() != db->tables[flag].column_num)
+		if (valueList.size() != db->tables[flag]->column_num)
 		{
 			cerr << "value错误：参数列表长度不一致"  << endl;
 			return -1;
 		}
 		m_string value[15];
 		int ptr = 0;
-		for (int i = 0; i < db->tables[flag].column_num; i++)
+		for (int i = 0; i < db->tables[flag]->column_num; i++)
 		{
-			m_string type = db->tables[flag].columns[i].data_type;
+			m_string type = db->tables[flag]->columns[i].data_type;
 			if (strcmp (type.str, "char") == 0)
 			{
 				trim(valueList[i]);
@@ -74,7 +74,7 @@ int insert_into_api(vector<string> valueList, string tableName)
 					cerr << "value错误：参数" + valueList[i] + "类型错误：char格式错误" << endl;
 					return -1;
 				}
-				int size = db->tables[flag].columns[i].data_size;
+				int size = db->tables[flag]->columns[i].data_size;
 				valueList[i].erase(valueList[i].begin());
 				valueList[i].erase(valueList[i].end() - 1);
 				if (valueList[i].length() > size)
@@ -306,6 +306,7 @@ string select_api(string tableName, vector<string> attrList, vector<condition> o
 				cout << result->rows[i]->data[j] << "\t\t";
 			cout << endl;
 		}
+		
 	}
 	// 需要进行条件弥合
 	else
@@ -360,6 +361,8 @@ string select_api(string tableName, vector<string> attrList, vector<condition> o
 				cout << all[i][j] << "\t\t";
 			cout << endl;
 		}
+
 	}
+
 	return "80";
 }

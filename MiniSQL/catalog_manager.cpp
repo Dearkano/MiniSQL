@@ -13,13 +13,13 @@ int data_dictionary::create_table(table table) {
 	//--------------预检查
 	database *db = this->db;
 	for (int i = 0; i < db->tableNum; i++) {
-		if (table.table_name== db->tables[i].table_name)
+		if (table.table_name== db->tables[i]->table_name)
 			return 1;
 	}
 
 	//--------------预检结束
 
-	db->tables[db->tableNum] = table;
+	db->tables[db->tableNum] = &table;
 	db->tableNum++;
 	this->update_database();
 	return 0;
@@ -28,7 +28,7 @@ int data_dictionary::delete_table(m_string tableName) {
 
 	database *db = this->db;
 	for (int i = 0; i < db->tableNum; i++) {
-		if (tableName==db->tables[i].table_name) {
+		if (tableName==db->tables[i]->table_name) {
 			for (int j = i; j < db->tableNum-1; j++) {
 				db->tables[j] = db->tables[j + 1];
 			}
@@ -43,16 +43,16 @@ int data_dictionary::delete_table(m_string tableName) {
 int data_dictionary::add_column(m_string tableName,column column) {
 	database *db = this->db;
 	for (int i = 0; i < db->tableNum; i++) {
-		if (tableName==db->tables[i].table_name) {
+		if (tableName==db->tables[i]->table_name) {
 			//-----预检查
-			for (int j = 0; j < db->tables[i].column_num; j++) {
-				if (db->tables[i].columns[j].column_name==column.column_name)
+			for (int j = 0; j < db->tables[i]->column_num; j++) {
+				if (db->tables[i]->columns[j].column_name==column.column_name)
 					return 2;
 			}
 			//-----预检结束
 			
-			db->tables[i].columns[db->tables[i].column_num] = column;
-			db->tables[i].column_num++;
+			db->tables[i]->columns[db->tables[i]->column_num] = column;
+			db->tables[i]->column_num++;
 			this->update_database();
 			return 0;
 		}
@@ -62,15 +62,15 @@ int data_dictionary::add_column(m_string tableName,column column) {
 int data_dictionary::delete_column(m_string tableName,m_string columnName) {
 	database *db = this->db;
 	for (int i = 0; i < db->tableNum; i++) {
-		if (tableName==db->tables[i].table_name) {
-			table tb = db->tables[i];
+		if (tableName==db->tables[i]->table_name) {
+			table tb = *db->tables[i];
 			for (int j = 0; j < tb.column_num; j++) {
 				if (columnName== tb.columns[j].column_name) {
 					for (int k = j; k < tb.column_num - 1; k++) {
 						tb.columns[k] = tb.columns[k + 1];
 					}
 					tb.column_num--;
-					db->tables[i] = tb;
+					db->tables[i] = &tb;
 					this->update_database();
 					return 0;
 				}
@@ -87,7 +87,7 @@ int data_dictionary::add_index(m_string tableName, m_string indexName)
 	table tb;
 	//检查表是否存在
 	for (int i = 0; i < db->tableNum; i++) {
-		tb = db->tables[i];
+		tb = *db->tables[i];
 		if (tb.table_name == tableName) {
 			rs = 1;
 			t = i;
@@ -123,7 +123,7 @@ int data_dictionary::add_index(m_string tableName, m_string indexName)
 	indexes[tb.index_num] = indexName;
 	tb.index_names = indexes;
 	tb.index_num++;
-	db->tables[t] = tb;
+	db->tables[t] = &tb;
 	this->update_database();
 	return 0;
 }
@@ -134,7 +134,7 @@ int data_dictionary::delete_index(m_string tableName, m_string indexName)
 	table tb;
 	//检查表是否存在
 	for (int i = 0; i < db->tableNum; i++) {
-		tb = db->tables[i];
+		tb = *db->tables[i];
 		if (tb.table_name == tableName) {
 			rs = 1;
 			t = i;
@@ -166,7 +166,7 @@ int data_dictionary::delete_index(m_string tableName, m_string indexName)
 	}
 	tb.index_names = indexes;
 	tb.index_num--;
-	db->tables[t] = tb;
+	db->tables[t] =&tb;
 	this->update_database();
 	return 0;
 }
@@ -179,7 +179,7 @@ void data_dictionary::build_dictionary() {
 void data_dictionary::listTable() {
 	database *db = this->db;
 	for (int i = 0; i < db->tableNum; i++) {
-		table tb = db->tables[i];
+		table tb = *db->tables[i];
 		cout.setf(std::ios::left);
 		cout << "表名:" << tb.table_name << endl << endl;
 		cout.width(10);
@@ -240,8 +240,8 @@ int data_dictionary::is_unique_or_pk(m_string tableName, int colNum)
 {
 	database *db = this->db;
 	for (int i = 0; i < db->tableNum; i++) {
-		if (db->tables[i].table_name == tableName) {
-			column col = db->tables[i].columns[colNum];
+		if (db->tables[i]->table_name == tableName) {
+			column col = db->tables[i]->columns[colNum];
 			if (col.isPrimaryKey || col.unique)return 1;
 			return 0;
 		}
@@ -270,7 +270,7 @@ void data_dictionary::update_database() {
 	}
 
 	for (int i = 0; i < db->tableNum; i++) {
-		table table = db->tables[i];
+		table table = *db->tables[i];
 		//写入表名
 		fwrite(table.table_name.str, sizeof(char), sizeof(m_string), fp);
 
