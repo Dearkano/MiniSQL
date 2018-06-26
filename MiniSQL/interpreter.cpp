@@ -272,6 +272,7 @@ string CreateTable(string sql)
 {
 	InterTable newTable;
 	vector<string> innerItem;
+	vector<string> orderAttr;
 	map<string, attrInfo> attrList; // 属性名--存储属性信息的结构体
 	string nowSql = sql.substr(12);
 	int position = nowSql.find('(', 0);
@@ -446,7 +447,10 @@ string CreateTable(string sql)
 				if ((it = attrList.find(tempInfo.attrName)) != attrList.end())
 					throw "建立表格时发生错误：属性名冲突";
 				else
+				{
 					attrList.insert(pair<string, attrInfo>(tempInfo.attrName, tempInfo));
+					orderAttr.push_back(tempInfo.attrName);
+				}
 			}
 			catch (const char* Msg)
 			{
@@ -460,6 +464,7 @@ string CreateTable(string sql)
 	newTable.attrList = attrList;
 	newTable.tableName = tableName;
 	newTable.prKey = primaryName;
+	newTable.orderAttr = orderAttr;
 	/**************************************/
 	/*construct the table class and insert*/
 	/**************************************/
@@ -639,7 +644,6 @@ attrInfo ProcessInfo(string info)
 		newInfo.length = length;
 		newInfo.reference = "";
 		return newInfo;
-
 	}
 }
 
@@ -982,11 +986,21 @@ string Select(string sql)
 				cerr << "语法错误：未指定需要查找的表" << endl;
 				return "99";
 			}
-			// 获得表名并继续截取
+			
 			sql = sql.substr(find + 5);
-			// condtion cod = ProcessWhere(sql); // 处理条件
-			// 这里需要定义一个条件类,然后处理异常
-			return "80";
+			trim(sql);
+			while (sql[sql.length() - 1] == ';')
+				sql.erase(sql.end() - 1);
+			trim(sql);
+			vector<condition> cod = WhereSplit(sql);
+			// 获得条件列表
+			for (int i = 0; i < cod.size(); i++)
+			{
+				cout << "condition: " << cod[i].attr << " " << cod[i].value << endl;
+			}
+			/*----------------------------------------*/
+			string a = select_api(tableName, newAttr, cod); // 如果查全部，newAttr是空的
+			return a;
 		}
 		else
 		{
@@ -999,26 +1013,10 @@ string Select(string sql)
 				cerr << "语法错误：未指定需要查找的表" << endl;
 				return "99";
 			}
-			if (all == true)
-			{
-				cout << "查"<< tableName <<"所有列！" << endl;
-				record_manager rm;
-				m_string a(tableName.c_str());
-				table* result = rm.select(a);
-				for (int i = 0; i < result->column_num; i++)
-				{
-					cout << result->columns[i].column_name << "\t\t";
-				}
-				cout << endl;
-				for (int i = 0; i < result->row_num; i++)
-				{
-					for(int j = 0; j < result->column_num; j++)
-					cout << result->rows[i]->data[j] << "\t\t";
-					cout << endl;
-				}
-
-			}
-			return "80";
+			vector<condition> cod;
+			cod.clear();
+			string a = select_api(tableName, newAttr, cod); // 如果查全部，newAttr是空的
+			return a;
 		}
 	}
 	else
@@ -1226,8 +1224,8 @@ vector<condition> WhereSplit(string input)
 		// 单纯大于
 		else if (find2 != string::npos && find4 == string::npos)
 		{
-			string attrName = codList[i].substr(0, find1);
-			string condition = codList[i].substr(find1);
+			string attrName = codList[i].substr(0, find2);
+			string condition = codList[i].substr(find2);
 			condition.erase(condition.begin()); //去除第一个字符
 			trim(attrName);
 			trim(condition);
