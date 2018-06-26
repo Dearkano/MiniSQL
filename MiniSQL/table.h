@@ -16,7 +16,8 @@ public:
 	int index_num;
 	m_string *index_names;
 	column *columns;
-	row *rows[];
 	int isError;
+	row *rows[];
+	
 };
 
