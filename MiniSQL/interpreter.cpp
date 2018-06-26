@@ -531,11 +531,11 @@ string CreateTable(string sql)
 	cout << newTable.tableName << endl;
 	map<string, attrInfo>::iterator iter;
 	iter = newTable.attrList.begin();
-	while (iter != newTable.attrList.end()) {
+	/*while (iter != newTable.attrList.end()) {
 		cout << iter->first << " : " << iter->second.attrType << " " << iter->second.length<< " " << \
 			iter->second.resType << " " << iter->second.unique <<endl;
 		iter++;
-	}
+	}*/
 	int result = create_table_api(newTable);
 	if (result == 1)
 	{
@@ -1069,7 +1069,7 @@ string Select(string sql)
 				cout << "condition: " << cod[i].attr << " " << cod[i].value << endl;
 			}
 			/*----------------------------------------*/
-			string a = select_api(tableName, newAttr, cod); // 如果查全部，newAttr是空的
+			string a = new_select_api(tableName, newAttr, cod); // 如果查全部，newAttr是空的
 			return a;
 		}
 		else
@@ -1085,7 +1085,7 @@ string Select(string sql)
 			}
 			vector<condition> cod;
 			cod.clear();
-			string a = select_api(tableName, newAttr, cod); // 如果查全部，newAttr是空的
+			string a = new_select_api(tableName, newAttr, cod); // 如果查全部，newAttr是空的
 			return a;
 		}
 	}

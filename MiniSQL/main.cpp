@@ -115,15 +115,15 @@ int main()
 			string result = Interpreter(input); //Ö´ĞĞsqlÓï¾ä
 			if (result == "99")
 			{
-				cout << "run error" << endl;
+				cout << "Óï¾äÖ´ĞĞÊ§°Ü" << endl;
 			}
 			else if (result == "80")
 			{
-				cout << "success" << endl;
+				cout << "Óï¾äÖ´ĞĞ³É¹¦" << endl;
 			}
 			else
 			{
-				cout << "run error" << endl;
+				cout << "Óï¾äÖ´ĞĞÊ§°Ü" << endl;
 			}
 		}
 	}

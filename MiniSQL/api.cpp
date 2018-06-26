@@ -188,6 +188,13 @@ int delete_from_api(string tableName, vector<condition> option)
 	int result = rc._delete(m_tableName, optAttr, value, cond);
 	return result;
 }
+
+
+int multi_delete(string tableName, vector<condition> option)
+{
+	return 0;
+}
+
 // 有condition的重载
 // 只有一个结果
 table* select_from_api(string tableName, vector<string> attrList, condition opt)
@@ -335,6 +342,7 @@ string select_api(string tableName, vector<string> attrList, vector<condition> o
 	{
 		vector<string> attr;
 		vector<vector<string>> all;
+		all.clear();
 		vector<int> rowNumber;
  		table* temp = select_from_api(tableName, attrList, options[0]);
 		if (temp->isError == 1)
@@ -369,8 +377,6 @@ string select_api(string tableName, vector<string> attrList, vector<condition> o
 				ts.push_back(tv);
 			}
 		}
-		all.clear();
-		vector<int> stack;
 		for (int i = 0; i < ts.size(); i++)
 		{
 			if (rowNumber[i] >= 0 && count(rowNumber.begin(), rowNumber.end(), rowNumber[i]) >= options.size())
@@ -391,7 +397,6 @@ string select_api(string tableName, vector<string> attrList, vector<condition> o
 			cout << "查询成功，但无匹配数据" << endl;
 			return "80";
 		}
-		
 		for (int i = 0; i < attr.size(); i++)
 			cout << attr[i] << "\t\t";
 		cout << endl;
@@ -401,12 +406,132 @@ string select_api(string tableName, vector<string> attrList, vector<condition> o
 				cout << all[i][j] << "\t\t";
 			cout << endl;
 		}
-
+		cout << "查询成功,共" <<all.size()<< "行" << endl;
+		return "80";
 	}
 
 	return "80";
 }
 
+string new_select_api(string tableName, vector<string> attrList, vector<condition> options)
+{
+	/*table *select_2(m_string tableName, int opt_num = 0, m_string column_name[] = NULL, m_string value[] = NULL, char opt[] = NULL, m_string res_name[] = NULL, int col_num = -1);*/
+	record_manager rc;
+	m_string column_name[15]; // 比较
+	m_string res_name[15]; // 查找
+	m_string value[15];
+	char opt[15];
+	table *result = nullptr;
+	int searchAttr = attrList.size(); //查找
+	int opt_num = options.size(); // 比较
+	if (searchAttr == 0)
+	{
+		if (opt_num == 0)
+		{
+			result = rc.select_2(m_string(tableName));
+		}
+		else
+		{
+			for (int i = 0; i < opt_num; i++)
+			{
+				column_name[i] = m_string(options[i].attr);
+				value[i] = m_string(options[i].value);
+				char cond;
+				switch (options[i].cond)
+				{
+				case BIG:
+					cond = '>';
+					break;
+				case SMALL:
+					cond = '<';
+					break;
+				case EQUAL:
+					cond = '=';
+					break;
+				case NOTSMALL:
+					cond = 'g';
+					break;
+				case NOTBIG:
+					cond = 'l';
+					break;
+				case NOTEQUAL:
+					cond = '!';
+					break;
+				default:
+					break;
+				}
+				opt[i] = cond;
+			}
+			result = rc.select_2(m_string(tableName), opt_num, column_name, value, opt);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < searchAttr; i++)
+		{
+			res_name[i] = m_string(attrList[i]);
+		}
+		if (opt_num == 0)
+		{
+			result = rc.select_2(m_string(tableName), 0, NULL, NULL, NULL, res_name, searchAttr);
+		}
+		else
+		{
+			for (int i = 0; i < opt_num; i++)
+			{
+				for (int i = 0; i < opt_num; i++)
+				{
+					column_name[i] = m_string(options[i].attr);
+					value[i] = m_string(options[i].value);
+					char cond;
+					switch (options[i].cond)
+					{
+					case BIG:
+						cond = '>';
+						break;
+					case SMALL:
+						cond = '<';
+						break;
+					case EQUAL:
+						cond = '=';
+						break;
+					case NOTSMALL:
+						cond = 'g';
+						break;
+					case NOTBIG:
+						cond = 'l';
+						break;
+					case NOTEQUAL:
+						cond = '!';
+						break;
+					default:
+						break;
+					}
+					opt[i] = cond;
+				}
+				result = rc.select_2(m_string(tableName), opt_num, column_name, value, opt,res_name,searchAttr);
+			}
+		}
+	}
+	if (result->isError == 1)
+	{
+		cerr << "查询错误：不存在的表名" << endl;
+		return "99";
+	}
+	else
+	{
+		for (int i = 0; i < result->column_num; i++)
+			cout << attrList[i] << "\t\t";
+		cout << endl;
+		for (int i = 0; i < result->row_num; i++)
+		{
+			for (int j = 0; j < result->column_num; j++)
+				cout << result->rows[i]->data[j] << "\t\t";
+			cout << endl;
+		}
+		return "80";
+	}
+}
 
 int drop_table_api(string tableName)
 {
@@ -449,6 +574,7 @@ string create_index_api(string tableName, string attr, string indexName)
 		switch (result)
 		{
 		case 0:
+			// return "80";
 			break;
 		case 1:
 			cout << "create index error: no such table" << endl;
@@ -557,3 +683,4 @@ string drop_index_api(string indexName)
 		return "99";
 	}
 }
+

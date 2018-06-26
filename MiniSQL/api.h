@@ -14,5 +14,6 @@ string select_api(string tableName, vector<string> attrList, vector<condition> o
 int drop_table_api(string tableName);
 string create_index_api(string tableName, string attr, string indexName);
 string drop_index_api(string indexName);
+string new_select_api(string tableName, vector<string> attrList, vector<condition> options);
 
 #endif // !_API_H_
