@@ -223,7 +223,7 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 		for (int i = 0; i < tb->row_num; i++) {
 			tb->rows[i] = new row(newData[i], tb->column_num);
 		}
-		free(data);
+		//free(data);
 
 		return tb;
 	}
@@ -346,7 +346,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 		m_string s;
 		stringstream ss;
 		int n, v;
-		float f;
+		float f,f1;
 		switch (opt) {
 		case '=':
 			if (isInt || isFloat) {
@@ -358,7 +358,10 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 					ss >> f;
 				ss.clear();
 				ss << value;
+				if(isInt==1)
 				ss >> v;
+				if (isFloat == 1)
+					ss >> f1;
 				if (isInt&&n == v) {
 					tb->row_num--;
 					for (int j = i; j < tb->row_num; j++) {
@@ -367,7 +370,7 @@ int record_manager::_delete(m_string tableName, m_string column, m_string value,
 					i = 0;
 					count++;
 				}
-				else if (isFloat&&f == v) {
+				else if (isFloat&&f == f1) {
 					tb->row_num--;
 					for (int j = i; j < tb->row_num; j++) {
 						data[j] = data[j + 1];
@@ -759,6 +762,7 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 record_manager::record_manager()
 {
 }
+/*
 
 int main() {
 	real_buffer_manager b;
@@ -791,4 +795,4 @@ int main() {
 	free(s);
 	system("pause");
 }
-
+*/
