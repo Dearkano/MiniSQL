@@ -2,15 +2,12 @@
 create table employee (
 	id int,
 	name char(32) unique,
-	gender char(1),
 	age int,
 	salary float,
 	country char(2),
 	email char(64) unique,
 	primary key (id)
 );
-
-
 
 insert into employee values(2915, 'Michael Wilson Etrb', 46, 90450.69, 'BF', 'charlottedavis117@test.com');
 insert into employee values(3750, 'Andrew Wilson Sfov', 39, 86988.21, 'OM', 'liamwhite502@test.org');
