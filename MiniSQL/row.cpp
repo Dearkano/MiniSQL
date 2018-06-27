@@ -30,5 +30,5 @@ row::row(m_string *data, int col_num, int colId[]) {
 
 row::~row()
 {
-	//delete[]this->data;
+	delete[]this->data;
 }

@@ -193,10 +193,11 @@ int delete_from_api(string tableName, vector<condition> option)
 
 int multi_delete(string tableName, vector<condition> option)
 {
+	record_manager r;
 	trim(tableName);
 	if (option.size() == 0)
 	{
-		int result = _delete_2(m_string(tableName));
+		int result = r._delete_2(m_string(tableName));
 		return result;
 	}
 	int size = option.size();
@@ -233,7 +234,7 @@ int multi_delete(string tableName, vector<condition> option)
 		}
 		opt[i] = cond;
 	}
-	int result = _delete_2(m_string(tableName), size, name, value, opt);
+	int result = r._delete_2(m_string(tableName), size, name, value, opt);
 	return result;
 
 }
