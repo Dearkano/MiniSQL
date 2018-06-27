@@ -5,7 +5,7 @@ create table employee (
 	age int,
 	salary float,
 	country char(2),
-	email char(64) unique,
+	email char(64),
 	primary key (id)
 );
 

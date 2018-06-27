@@ -88,7 +88,7 @@ int insert_into_api(vector<string> valueList, string tableName)
 				if (valueList[i][0] != '\'' || valueList[i][valueList[i].length() - 1] != '\'')
 				{
 					cerr << "value错误：参数" + valueList[i] + "类型错误：char格式错误" << endl;
-					return -1;
+					return -2;
 				}
 				int size = db->tables[flag]->columns[i].data_size;
 				valueList[i].erase(valueList[i].begin());
@@ -96,7 +96,7 @@ int insert_into_api(vector<string> valueList, string tableName)
 				if (valueList[i].length() > size)
 				{
 					cerr << "value错误：参数" + valueList[i] + "类型错误：char字符串长度超过限制" << endl;
-					return -1;
+					return -3;
 				}
 				m_string str(valueList[i].c_str());
 				value[ptr++] = str;
@@ -107,7 +107,7 @@ int insert_into_api(vector<string> valueList, string tableName)
 				if (!IsLegalInt(valueList[i]))
 				{
 					cerr << "value错误：参数" + valueList[i] + "类型错误：int格式错误" << endl;
-					return -1;
+					return -4;
 				}
 				m_string _int(valueList[i].c_str());
 				value[ptr++] = _int;
@@ -118,7 +118,7 @@ int insert_into_api(vector<string> valueList, string tableName)
 				if (!IsLegalFloat(valueList[i]))
 				{
 					cerr << "value错误：参数" + valueList[i] + "类型错误:float格式错误" << endl;
-					return -1;
+					return -5;
 				}
 				m_string _float(valueList[i].c_str());
 				value[ptr++] = _float;
@@ -138,15 +138,16 @@ int insert_into_api(vector<string> valueList, string tableName)
 		if (result == -1)
 		{
 			cerr << "value错误：查无此表" << endl;
-			return -1;
+			return -6;
 		}
 		else
 		{
 			if (result == 1)
-				cerr << "value错误：主键或unique冲突" << endl;
+				cout << "value错误：主键或unique冲突" << endl;
 			return result;
 		}
 	}
+
 	cerr << "value错误：查无此表" << endl;
 	return -1;
 }
@@ -833,7 +834,8 @@ int update_api(string tableName, string attrName, string value, vector<condition
 	{
 		trim(options[i].attr);
 		column2[i] = m_string(options[i].attr);
-		value2[i] = m_string(value);
+		trim(options[i].value);
+		value2[i] = m_string(options[i].value);
 		char cond = ' ';
 		switch (options[i].cond)
 		{

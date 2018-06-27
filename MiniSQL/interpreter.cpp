@@ -181,7 +181,6 @@ string ExecFile(string path)
 	int find = path.find("execfile");
 	find += 8;
 	path = path.substr(find);
-	cout << path << endl;
 	if (path.empty())
 	{
 		cerr << "语法错误：空路径" << endl;
@@ -544,7 +543,7 @@ string CreateTable(string sql)
 	/**************************************/
 	/*construct the table class and insert*/
 	/**************************************/
-	cout << newTable.tableName << endl;
+
 	map<string, attrInfo>::iterator iter;
 	iter = newTable.attrList.begin();
 	/*while (iter != newTable.attrList.end()) {
@@ -818,14 +817,12 @@ string DropIndex(string sql)
 		trim(tableName);
 		string result = drop_index_api(tableName);
 		return result;
-		cout << "delete from " << tableName << " success" << endl;
 	}
 	else
 	{
 		cerr << "语法错误：drop index:无法确定的索引名" << endl;
 		return "99";
 	}
-	return sql;
 }
 
 string Delete(string sql)
@@ -1003,6 +1000,7 @@ string Insert(string sql)
 		}
 		else
 		{
+			cout << result << endl;
 			cout << "insertInto" << endl;
 			return "99";
 		}
@@ -1472,7 +1470,7 @@ string UpdateTable(string sql)
 	trim(sql);								//	将字符串两端空格去除
 	string formSql = sql;					//	储存原字符串
 	sql = sql.substr(6);					//	去除update，其为6位
-	if (sql[0] != ' ' || sql[0] != '\t')	//	如果update的下字符非空
+	if (sql[0] != ' ' && sql[0] != '\t')	//	如果update的下字符非空
 	{
 		cerr << "Syntax Error: Invalid table name in update expression" << endl;
 		return "99";
@@ -1493,7 +1491,7 @@ string UpdateTable(string sql)
 		return "99";
 	}
 	sql = sql.substr(find + 3);
-	if (sql[0] != ' ' || sql[0] != '\t')	//	如果update的下字符非空
+	if (sql[0] != ' ' && sql[0] != '\t')	//	如果update的下字符非空
 	{
 		cerr << "Syntax Error: Invalid attribute name in update expression" << endl;
 		return "99";
@@ -1550,6 +1548,15 @@ string UpdateTable(string sql)
 		return "99";
 	}
 	int result = update_api(tableName, container[0], container[1], condList);
+	if (result < 0)
+	{
+		return "99";
+	}
+	else if(result == 1)
+	{
+		cout << "DB Error：no such table" << endl;
+		return "99";
+	}
 	return "80";
 }
 

@@ -308,7 +308,7 @@ int record_manager::add(m_string tableName, m_string* newRow)
 	catch (...)
 	{
 		cout << "´íÎó3" << endl;
-		return 1;
+		return 4;
 	}
 	m_string **originData;
 	int rnum;
@@ -321,6 +321,7 @@ int record_manager::add(m_string tableName, m_string* newRow)
 	catch (...)
 	{
 		cout << "´íÎó7" << endl;
+		return 6;
 	}
 	//if(rs==0)throw error
 	try
@@ -358,7 +359,7 @@ int record_manager::add(m_string tableName, m_string* newRow)
 	catch(...)
 	{
 		cout << "´íÎó5" << endl;
-		return 1;
+		return 3;
 	}
 
 	try
@@ -374,7 +375,7 @@ int record_manager::add(m_string tableName, m_string* newRow)
 	catch (...)
 	{
 		cout << "´íÎó7" << endl;
-		return 1;
+		return 2;
 	}
 	
 }
