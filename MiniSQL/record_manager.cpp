@@ -333,7 +333,7 @@ int record_manager::add(m_string tableName, m_string* newRow)
 	this->dict.update_database();
 	delete tb;
 	tb = NULL;
-	delete originData;
+	//delete originData;
 	return 0;
 	
 }
@@ -1035,7 +1035,6 @@ int record_manager::update(m_string tableName,int opt_num ,m_string column1, m_s
 
 	// if(rs==0) throw error;
 
-	m_string ** data = b1.read_table(tb->table_name, tb->row_num, tb->column_num);
 	/*
 	检查更新列
 	*/
