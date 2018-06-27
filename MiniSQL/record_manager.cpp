@@ -287,54 +287,95 @@ table* record_manager::select(m_string tableName, m_string *columns, int columnN
 
 int record_manager::add(m_string tableName, m_string* newRow)
 {
-	database *db = this->dict.db;
-	table *tb = new table();
+	database *db;
+	table *tb;
 	real_buffer_manager r;
 	int rs = 0;
 	int t;
-	for (int i = 0; i < db->tableNum; i++) {
-		if (tableName == db->tables[i]->table_name) {
-			tb = db->tables[i];
-			t = i;
-			rs = 1;
-			break;
+	try
+	{
+		db = this->dict.db;
+		tb = new table();
+		for (int i = 0; i < db->tableNum; i++) {
+			if (tableName == db->tables[i]->table_name) {
+				tb = db->tables[i];
+				t = i;
+				rs = 1;
+				break;
+			}
 		}
 	}
+	catch (...)
+	{
+		cout << "错误3" << endl;
+		return 1;
+	}
+	m_string **originData;
+	int rnum;
 	if (rs == 0)return -1;
-	m_string **originData = r.read_table(tb->table_name, tb->row_num, tb->column_num);
-	originData[tb->row_num] = new m_string[tb->column_num];
+	try
+	{
+		originData = r.read_table(tb->table_name, tb->row_num, tb->column_num);
+		originData[tb->row_num] = new m_string[tb->column_num];
+	}
+	catch (...)
+	{
+		cout << "错误7" << endl;
+	}
 	//if(rs==0)throw error
-	int rnum = tb->row_num;
-	data_dictionary d;
-	for (int i = 0; i < rnum; i++) {
-		for (int j = 0; j < tb->column_num; j++) {
-			//主键或者唯一
-			if (d.is_unique_or_pk(tb->table_name, j)) {
-				if (newRow[j] == originData[i][j]) {
-					delete tb;
-					tb = NULL;
-					return 1;
+	try
+	{
+		rnum = tb->row_num;
+		data_dictionary d;
+		for (int i = 0; i < rnum; i++) {
+			for (int j = 0; j < tb->column_num; j++) {
+				//主键或者唯一
+				if (d.is_unique_or_pk(tb->table_name, j)) {
+					if (newRow[j] == originData[i][j]) {
+						delete tb;
+						tb = NULL;
+						return 1;
+					}
 				}
 			}
 		}
 	}
+	catch (...)
+	{
+		cout << "错误8" << endl;
+	}
+	try
+	{
 
-	for (int i = 0; i < tb->column_num; i++) {
-		strcpy(originData[rnum][i].str, newRow[i].str);
+		for (int i = 0; i < tb->column_num; i++) {
+			strcpy(originData[rnum][i].str, newRow[i].str);
+		}
+
+
+		//申请buffer manager将表更改后的内容存入硬盘
+		int result = r.update_table(tb->table_name, originData, tb->row_num + 1, tb->column_num);
+	}
+	catch(...)
+	{
+		cout << "错误5" << endl;
+		return 1;
 	}
 
-
-	//申请buffer manager将表更改后的内容存入硬盘
-	int result = r.update_table(tb->table_name, originData, tb->row_num + 1, tb->column_num);
-
-
-	//更新数据字典的行数
-	this->dict.db->tables[t]->row_num++;
-	this->dict.update_database();
-	delete tb;
-	tb = NULL;
-	//delete originData;
-	return 0;
+	try
+	{
+		//更新数据字典的行数
+		this->dict.db->tables[t]->row_num++;
+		this->dict.update_database();
+		delete tb;
+		tb = NULL;
+		//delete originData;
+		return 0;
+	}
+	catch (...)
+	{
+		cout << "错误7" << endl;
+		return 1;
+	}
 	
 }
 int record_manager::drop_table(m_string tableName) {

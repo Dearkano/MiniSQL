@@ -2,7 +2,6 @@
 #include"record_manager.h"
 #include"catalog_manager.h"
 #include"table.h"
-#include<Python.h>
 
 using namespace std;
 
@@ -11,7 +10,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 
-	int md = 1;
+	int md = 0;
 	if (md != 1) {
 		int mode;
 		data_dictionary db;
@@ -52,12 +51,12 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 	else {
-		Py_SetProgramName(argv[0]);
+		/*Py_SetProgramName(argv[0]);
 		Py_Initialize();
 		PyRun_SimpleString("print 'Hello Python!'\n");
 		Py_Finalize();
 		getchar();
-		return 0;
+		return 0;*/
 	}
 }
 

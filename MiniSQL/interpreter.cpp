@@ -991,6 +991,7 @@ string Insert(string sql)
 	}
 	catch(...)
 	{
+		cout << "valueSplit" << endl;
 		return "99";
 	}
 	try
@@ -1002,11 +1003,13 @@ string Insert(string sql)
 		}
 		else
 		{
+			cout << "insertInto" << endl;
 			return "99";
 		}
 	}
 	catch(...)
 	{
+		cout << "insertIntoError" << endl;
 		return "99";
 	}
 }
@@ -1546,9 +1549,7 @@ string UpdateTable(string sql)
 		cerr << "Syntax Error: illgal attribute name" << endl;
 		return "99";
 	}
-	//  开始调用接口
-
-
+	int result = update_api(tableName, container[0], container[1], condList);
 	return "80";
 }
 
