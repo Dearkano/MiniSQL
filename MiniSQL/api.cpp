@@ -729,7 +729,3 @@ string drop_index_api(string indexName)
 	}
 }
 
-void clear()
-{
-	
-}

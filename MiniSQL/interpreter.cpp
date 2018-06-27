@@ -1003,6 +1003,7 @@ string Insert(string sql)
 
 string Select(string sql)
 {
+	if (sql.empty()) return "80";
 	string preSql = sql;
 	// 去除头部的select
 	string mask1 = "select";
@@ -1446,3 +1447,4 @@ void clear()
 {
 
 }
+
