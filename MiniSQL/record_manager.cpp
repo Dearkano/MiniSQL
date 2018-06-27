@@ -401,33 +401,75 @@ temp_row record_manager::select_row(m_string tableName, m_string column, m_strin
 	tt->num = -2;
 	if (c == -1)return *tt;
 
-
-	for (int i = 0; i < tb->row_num; i++) {
-		switch (opt) {
-		case '=':
-			if (data[i][c] == value)
-				res[count++] = i;
-			break;
-		case'>':
-			if (data[i][c] > value)
-				res[count++] = i;
-			break;
-		case '<':
-			if (data[i][c] < value)
-				res[count++] = i;
-			break;
-		case '!':
-			if (data[i][c] != value)
-				res[count++] = i;
-			break;
-		case 'g':
-			if (data[i][c] >= value)
-				res[count++] = i;
-			break;
-		case 'l':
-			if (data[i][c] <= value)
-				res[count++] = i;
-			break;
+	int isFloat = 0;
+	if (strcmp("float", tb->columns[c].data_type.str) == 0) {
+		isFloat = 1;
+	}
+	if (isFloat == 0) {
+		for (int i = 0; i < tb->row_num; i++) {
+			switch (opt) {
+			case '=':
+				if (data[i][c] == value)
+					res[count++] = i;
+				break;
+			case'>':
+				if (data[i][c] > value)
+					res[count++] = i;
+				break;
+			case '<':
+				if (data[i][c] < value)
+					res[count++] = i;
+				break;
+			case '!':
+				if (data[i][c] != value)
+					res[count++] = i;
+				break;
+			case 'g':
+				if (data[i][c] >= value)
+					res[count++] = i;
+				break;
+			case 'l':
+				if (data[i][c] <= value)
+					res[count++] = i;
+				break;
+			}
+		}
+	}
+	else {
+		for (int i = 0; i < tb->row_num; i++) {
+			float v1, v2;
+			stringstream ss;
+			ss << data[i][c];
+			ss >> v1;
+			ss.clear();
+			ss << value;
+			ss >> v2;
+			switch (opt) {
+			case '=':
+				if (v1 == v2)
+					res[count++] = i;
+				break;
+			case'>':
+				if (v1 > v2)
+					res[count++] = i;
+				break;
+			case '<':
+				if (v1 < v2)
+					res[count++] = i;
+				break;
+			case '!':
+				if (v1 != v2)
+					res[count++] = i;
+				break;
+			case 'g':
+				if (v1 >= v2)
+					res[count++] = i;
+				break;
+			case 'l':
+				if (v1 <= v2)
+					res[count++] = i;
+				break;
+			}
 		}
 	}
 	temp_row *tr = new temp_row();
@@ -922,7 +964,7 @@ table* record_manager::select_2(m_string tableName, int opt_num, m_string column
 		int p = 0;
 		for (int i = 0; i < tb->row_num; i++) {
 			if (i == rows[p]) {
-				_table->rows[p++] = new row(data[i], col_num, colId);
+				_table->rows[p++] = new row(data[i], tb->column_num, colId);
 			}
 		}
 	}
