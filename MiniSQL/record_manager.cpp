@@ -3,7 +3,7 @@
 #include"column.h"
 #include"record_manager.h"
 #include"catalog_manager.h"
-#include"real_buffer_manager.h"
+#include"block_manager.h"
 #include<iostream>
 #include<fstream>
 #include<sstream>
@@ -401,9 +401,12 @@ temp_row record_manager::select_row(m_string tableName, m_string column, m_strin
 	tt->num = -2;
 	if (c == -1)return *tt;
 
-	int isFloat = 0;
+	int isFloat = 0, isInt = 0;
 	if (strcmp("float", tb->columns[c].data_type.str) == 0) {
 		isFloat = 1;
+	}
+	if (strcmp("int", tb->columns[c].data_type.str) == 0) {
+		isInt = 1;
 	}
 	if (isFloat == 0) {
 		for (int i = 0; i < tb->row_num; i++) {
@@ -430,6 +433,43 @@ temp_row record_manager::select_row(m_string tableName, m_string column, m_strin
 				break;
 			case 'l':
 				if (data[i][c] <= value)
+					res[count++] = i;
+				break;
+			}
+		}
+	}
+	else if (isInt == 1&&isFloat==0) {
+		for (int i = 0; i < tb->row_num; i++) {
+			int v1, v2;
+			stringstream ss;
+			ss << data[i][c];
+			ss >> v1;
+			ss.clear();
+			ss << value;
+			ss >> v2;
+			switch (opt) {
+			case '=':
+				if (v1 == v2)
+					res[count++] = i;
+				break;
+			case'>':
+				if (v1 > v2)
+					res[count++] = i;
+				break;
+			case '<':
+				if (v1 < v2)
+					res[count++] = i;
+				break;
+			case '!':
+				if (v1 != v2)
+					res[count++] = i;
+				break;
+			case 'g':
+				if (v1 >= v2)
+					res[count++] = i;
+				break;
+			case 'l':
+				if (v1 <= v2)
 					res[count++] = i;
 				break;
 			}
