@@ -156,20 +156,41 @@ int data_dictionary::delete_index(m_string name)
 	FILE *fp;
 	fp = fopen("./index.dat", "rb");
 	if (fp);
-	m_string tableName, colName, _name;
+	m_string tableNames[20], colNames[20], _names[20],tableName,colName,_name;
+	int rs = 0,f=0;
 	for (int i = 0; i < totalIndex; i++) {
-		fread(tableName.str, sizeof(char), 256, fp);
-		fread(colName.str, sizeof(char), 256, fp);
-		fread(_name.str, sizeof(char), 256, fp);
-		if (name == _name) {
-			break;
+		fread(tableNames[i].str, sizeof(char), 256, fp);
+		fread(colNames[i].str, sizeof(char), 256, fp);
+		fread(_names[i].str, sizeof(char), 256, fp);
+		if (_names[i] == name) {
+			tableName = tableNames[i];
+			colName = colNames[i];
+			_name = _names[i];
+			rs = 1;
+			f = i;
 		}
+
 	}
+	fclose(fp);
+	fp = fopen("./index.dat", "wb");
+
+	for (int i = f; i < totalIndex - 1; i++) {
+		tableNames[i] = tableNames[i + 1];
+		_names[i] = _names[i + 1];
+		colNames[i] = colNames[i + 1];
+	}
+
+	for (int i = 0; i < totalIndex - 1; i++) {
+		fwrite(tableNames[i].str, sizeof(char), 256, fp);
+		fwrite(colNames[i].str, sizeof(char), 256, fp);
+		fwrite(_names[i].str, sizeof(char), 256, fp);
+	}
+	fclose(fp);
 	m_string indexName = colName;
 
 
 
-	int rs = 0; int t = 0;
+	rs = 0; int t = 0;
 	table tb;
 	//检查表是否存在
 	for (int i = 0; i < db->tableNum; i++) {

@@ -1,5 +1,5 @@
 #include "api.h"
-#include "real_buffer_manager.h"
+#include "block_manager.h"
 #include <cstring>
 #include <set>
 #include <algorithm>
@@ -724,8 +724,8 @@ string drop_index_api(string indexName)
 	}
 	catch (std::exception& e)
 	{
-		e.what();
-		return "99";
+		//e.what();
+		return "80";
 	}
 }
 

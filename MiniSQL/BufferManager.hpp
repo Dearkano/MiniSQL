@@ -34,4 +34,4 @@ void replace(FileInfo *m_fileInfo, BlockInfo *m_blockInfo);
 BlockInfo *readBlock(FileInfo *file_temp, string DB_Name, const int m_blockNum, BlockInfo *block_temp);
 void writeBlock(string DB_Name, BlockInfo *block);
 void closeDatabase(string DB_Name, bool m_flag);
-void closeFile(string DB_Name, FileInfo *file_temp)
+void closeFile(string DB_Name, FileInfo *file_temp);

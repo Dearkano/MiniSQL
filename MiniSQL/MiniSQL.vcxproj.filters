@@ -33,9 +33,6 @@
     <ClCompile Include="record_manager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="real_buffer_manager.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="interpreter.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -43,6 +40,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="api.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BufferManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="block_manager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -68,9 +71,6 @@
     <ClInclude Include="m_string.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="real_buffer_manager.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="interpreter.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -87,6 +87,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Node.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferManager.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="block_manager.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -3,7 +3,7 @@
 #include"column.h"
 #include"record_manager.h"
 #include"catalog_manager.h"
-#include"real_buffer_manager.h"
+#include"block_manager.h"
 #include<iostream>
 #include<fstream>
 #include<sstream>
@@ -401,9 +401,12 @@ temp_row record_manager::select_row(m_string tableName, m_string column, m_strin
 	tt->num = -2;
 	if (c == -1)return *tt;
 
-	int isFloat = 0;
+	int isFloat = 0, isInt = 0;
 	if (strcmp("float", tb->columns[c].data_type.str) == 0) {
 		isFloat = 1;
+	}
+	if (strcmp("int", tb->columns[c].data_type.str) == 0) {
+		isInt = 1;
 	}
 	if (isFloat == 0) {
 		for (int i = 0; i < tb->row_num; i++) {
@@ -430,6 +433,43 @@ temp_row record_manager::select_row(m_string tableName, m_string column, m_strin
 				break;
 			case 'l':
 				if (data[i][c] <= value)
+					res[count++] = i;
+				break;
+			}
+		}
+	}
+	else if (isInt == 1&&isFloat==0) {
+		for (int i = 0; i < tb->row_num; i++) {
+			int v1, v2;
+			stringstream ss;
+			ss << data[i][c];
+			ss >> v1;
+			ss.clear();
+			ss << value;
+			ss >> v2;
+			switch (opt) {
+			case '=':
+				if (v1 == v2)
+					res[count++] = i;
+				break;
+			case'>':
+				if (v1 > v2)
+					res[count++] = i;
+				break;
+			case '<':
+				if (v1 < v2)
+					res[count++] = i;
+				break;
+			case '!':
+				if (v1 != v2)
+					res[count++] = i;
+				break;
+			case 'g':
+				if (v1 >= v2)
+					res[count++] = i;
+				break;
+			case 'l':
+				if (v1 <= v2)
 					res[count++] = i;
 				break;
 			}
@@ -858,6 +898,7 @@ int record_manager::_delete_2(m_string tableName, int opt_num, m_string column_n
 
 	temp_row tr1 = this->select_row(tb->table_name, column_name[0], value[0], opt[0]);
 	temp_row *tr = new temp_row();
+	tr = &tr1;
 	for (int i = 1; i < opt_num; i++) {
 		temp_row tr2 = this->select_row(tb->table_name, column_name[i], value[i], opt[i]);
 		*tr = mix(tr1, tr2);
@@ -883,10 +924,11 @@ int record_manager::_delete_2(m_string tableName, int opt_num, m_string column_n
 			newData[p++] = data[i];
 		}
 	}
+	int pk = this->dict.db->tables[t]->row_num - p;
 	b.update_table(tb->table_name, newData, p, tb->column_num);
 	this->dict.db->tables[t]->row_num = p;
 	this->dict.update_database();
-	return p;
+	return pk;
 }
 table* record_manager::select_2(m_string tableName, int opt_num, m_string column_name[], m_string value[], char opt[], m_string res_name[], int col_num)
 {

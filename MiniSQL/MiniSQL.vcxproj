@@ -123,12 +123,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BufferManager.cpp" />
     <ClCompile Include="column.cpp" />
     <ClCompile Include="database.cpp" />
     <ClCompile Include="catalog_manager.cpp" />
     <ClCompile Include="interpreter.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="real_buffer_manager.cpp" />
+    <ClCompile Include="block_manager.cpp" />
     <ClCompile Include="record_manager.cpp" />
     <ClCompile Include="row.cpp" />
     <ClCompile Include="table.cpp" />
@@ -136,6 +137,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BPTree.h" />
+    <ClInclude Include="BufferManager.hpp" />
     <ClInclude Include="catalog_manager.h" />
     <ClInclude Include="column.h" />
     <ClInclude Include="database.h" />
@@ -144,7 +146,7 @@
     <ClInclude Include="interpreter.h" />
     <ClInclude Include="m_string.h" />
     <ClInclude Include="Node.h" />
-    <ClInclude Include="real_buffer_manager.h" />
+    <ClInclude Include="block_manager.h" />
     <ClInclude Include="record_manager.h" />
     <ClInclude Include="row.h" />
     <ClInclude Include="table.h" />
