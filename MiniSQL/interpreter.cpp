@@ -1442,5 +1442,7 @@ string CreateIndex(string sql)
 }
 
 
+void clear()
+{
 
-
+}

@@ -18,6 +18,5 @@ public:
 	column *columns;
 	int isError;
 	row *rows[];
-	
 };
 
