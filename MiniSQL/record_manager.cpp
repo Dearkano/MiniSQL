@@ -311,7 +311,6 @@ int record_manager::add(m_string tableName, m_string* newRow)
 			//主键或者唯一
 			if (d.is_unique_or_pk(tb->table_name, j)) {
 				if (newRow[j] == originData[i][j]) {
-
 					delete tb;
 					tb = NULL;
 					return 1;
@@ -334,7 +333,9 @@ int record_manager::add(m_string tableName, m_string* newRow)
 	this->dict.update_database();
 	delete tb;
 	tb = NULL;
+	//delete originData;
 	return 0;
+	
 }
 int record_manager::drop_table(m_string tableName) {
 	database *db = this->dict.db;
@@ -382,7 +383,7 @@ temp_row record_manager::select_row(m_string tableName, m_string column, m_strin
 
 	int c = -1;
 	int count = 0;
-	int *res = new int[1000];
+	int *res = new int[15000];
 	if (opt == ' ') {
 		for (int i = 0; i < tb->row_num; i++)
 			res[i] = i;
@@ -1016,9 +1017,9 @@ table* record_manager::select_2(m_string tableName, int opt_num, m_string column
 	delete tb;
 	return _table;
 }
-int record_manager::update(m_string tableName, m_string column1, m_string value1, m_string column2, m_string value2, char opt)
+int record_manager::update(m_string tableName,int opt_num ,m_string column1, m_string value1 , m_string *column2, m_string *value2,char *opt)
 {
-	database *db = this->dict.db;
+	database *db = new database();
 	table *tb = new table();
 	real_buffer_manager b1;
 	int rs = 0;
@@ -1034,184 +1035,36 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 
 	// if(rs==0) throw error;
 
-	m_string ** data = b1.read_table(tb->table_name, tb->row_num, tb->column_num);
 	/*
 	检查更新列
 	*/
-	int t1 = 0;
+	int t1 = -1;
 	for (int i = 0; i < tb->column_num; i++) {
 		if (column1 == tb->columns[i].column_name) {
 			t1 = i;
 			break;
 		}
 	}
-	if (opt == ' ') {
-		for (int i = 0; i < tb->row_num; i++) {
-			strcpy(data[i][t1].str, value1.str);
-		}
-	}
-	else {
-		/*
-		检查约束列
-		*/
-		int r = 0, c = 0, isInt = 0, isFloat = 0;
-		for (int i = 0; i < tb->column_num; i++) {
-			if (column2 == tb->columns[i].column_name) {
-				c = i;
-				if (strcmp(tb->columns[i].data_type.str, "int") == 0)
-					isInt = 1;
-				if (strcmp(tb->columns[i].data_type.str, "float") == 0)
-					isFloat = 1;
-				break;
-			}
-		}
-		//遍历搜索
-		for (int i = 0; i < tb->row_num; i++) {
-			m_string s;
-			stringstream ss;
-			int n, v;
-			float f, f1;
-			switch (opt) {
-			case '=':
-				if (isInt || isFloat) {
-					s = data[i][c];
-					ss << s;
-					if (isInt == 1)
-						ss >> n;
-					if (isFloat == 1)
-						ss >> f;
-					ss.clear();
-					ss << value2;
-					if (isInt == 1)
-						ss >> v;
-					if (isFloat == 1)
-						ss >> f1;
-					if (isInt&&n == v) {
-						strcpy(data[i][t1].str, value1.str);
-					}
-					else if (isFloat&&f == f1) {
-						strcpy(data[i][t1].str, value1.str);
-					}
-				}
-				else {
-					if (strcmp(value2.str, data[i][c].str) == 0) {
-						strcpy(data[i][t1].str, value1.str);
-					}
-				}
-				break;
-			case'>':
-				s = data[i][c];
-				ss << s;
-				if (isInt == 1)
-					ss >> n;
-				if (isFloat == 1)
-					ss >> f;
-				ss.clear();
-				ss << value2;
-				if (isInt == 1)
-					ss >> v;
-				if (isFloat == 1)
-					ss >> f1;
-				if (isInt&&n > v) {
-					strcpy(data[i][t1].str, value1.str);
-				}
-				else if (isFloat&&f > f1) {
-					strcpy(data[i][t1].str, value1.str);
-				}
-				break;
-			case'<':
-				s = data[i][c];
-				ss << s;
-				if (isInt == 1)
-					ss >> n;
-				if (isFloat == 1)
-					ss >> f;
-				ss.clear();
-				ss << value2;
-				if (isInt == 1)
-					ss >> v;
-				if (isFloat == 1)
-					ss >> f1;
-				if (isInt&&n < v) {
-					strcpy(data[i][t1].str, value1.str);
-				}
-				else if (isFloat&&f < f1) {
-					strcpy(data[i][t1].str, value1.str);
-				}
-				break;
-			case'g':
-				s = data[i][c];
-				ss << s;
-				if (isInt == 1)
-					ss >> n;
-				if (isFloat == 1)
-					ss >> f;
-				ss.clear();
-				ss << value2;
-				if (isInt == 1)
-					ss >> v;
-				if (isFloat == 1)
-					ss >> f1;
-				if (isInt&&n >= v) {
-					strcpy(data[i][t1].str, value1.str);
-				}
-				else if (isFloat&&f >= f1) {
-					strcpy(data[i][t1].str, value1.str);
-				}
-				break;
-			case'l':
-				s = data[i][c];
-				ss << s;
-				if (isInt == 1)
-					ss >> n;
-				if (isFloat == 1)
-					ss >> f;
-				ss.clear();
-				ss << value2;
-				if (isInt == 1)
-					ss >> v;
-				if (isFloat == 1)
-					ss >> f1;
-				if (isInt&&n <= v) {
-					strcpy(data[i][t1].str, value1.str);
-				}
-				else if (isFloat&&f <= f1) {
-					strcpy(data[i][t1].str, value1.str);
-				}
-				break;
-			case'!':
-				if (isInt || isFloat) {
-					int n, v;
-					s = data[i][c];
-					ss << s;
-					if (isInt == 1)
-						ss >> n;
-					if (isFloat == 1)
-						ss >> f;
-					ss.clear();
-					ss << value2;
-					if (isInt == 1)
-						ss >> v;
-					if (isFloat == 1)
-						ss >> f1;
-					if (isInt&&n != v) {
-						strcpy(data[i][t1].str, value1.str);
-					}
-					else if (isFloat&&f != f1) {
-						strcpy(data[i][t1].str, value1.str);
-					}
-				}
-				else {
-					if (strcmp(value2.str, data[i][c].str) != 0) {
-						strcpy(data[i][t1].str, value1.str);
-					}
-				}
-				break;
-			}
-		}
-	}
+	if (t1 == -1)return 1;
+	
 
+	real_buffer_manager b;
+	m_string **data1 = b.read_table(tb->table_name, tb->row_num, tb->column_num);
+	m_string **data = new m_string*[tb->row_num];
+	for (int i = 0; i < tb->row_num; i++) data[i] = data1[i];
+	temp_row *tr = new temp_row();
+		temp_row tr1 = this->select_row(tb->table_name, column2[0], value2[0], opt[0]);
+		*tr = tr1;
+		for (int i = 1; i < opt_num; i++) {
+			temp_row tr2 = this->select_row(tb->table_name, column2[i], value2[i], opt[i]);
+			*tr = mix(tr1, tr2);
+			tr1.num = tr->num;
+			tr1.row = tr->row;
+		}
 
+		for (int i = 0; i < tr->num; i++) {
+			data[tr->row[i]][t1] = value1;
+		}
 
 	/*
 	data是新的文件
@@ -1225,8 +1078,8 @@ int record_manager::update(m_string tableName, m_string column1, m_string value1
 	}
 	real_buffer_manager r;
 	r.update_table(tb->table_name, d, tb->row_num, tb->column_num);
-	//free(d);
-	//free(data);
+	delete d;
+	delete data;
 	delete tb;
 	tb = NULL;
 	return 0;
