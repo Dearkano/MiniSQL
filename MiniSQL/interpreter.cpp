@@ -879,7 +879,7 @@ string Delete(string sql)
 	}
 	if (cod.size() <= 1)
 	{
-		int result = delete_from_api(tableName, cod);
+		int result = multi_delete(tableName, cod);
 		if (result == -1)
 		{
 			cerr << "delete错误：查无此表" << endl;
@@ -900,8 +900,24 @@ string Delete(string sql)
 	}
 	else
 	{
-		cout << "残念です！本数据库不支持多条件删除！" << endl;
-		return "99";
+		int result = multi_delete(tableName, cod);
+		if (result == -1)
+		{
+			cerr << "delete错误：查无此表" << endl;
+			return "99";
+		}
+		else if (result == -2)
+		{
+			cerr << "delete错误:where条件提供的属性不存在" << endl;
+			return "99";
+		}
+		else if (result < 0)
+		{
+			// 其他错误
+			return "99";
+		}
+		cout << result << "行受影响" << endl;
+		return "80";
 	}
 }
 

@@ -194,9 +194,10 @@ int delete_from_api(string tableName, vector<condition> option)
 int multi_delete(string tableName, vector<condition> option)
 {
 	trim(tableName);
+	record_manager rc;
 	if (option.size() == 0)
 	{
-		int result = _delete_2(m_string(tableName));
+		int result = rc._delete_2(m_string(tableName));
 		return result;
 	}
 	int size = option.size();
@@ -233,228 +234,228 @@ int multi_delete(string tableName, vector<condition> option)
 		}
 		opt[i] = cond;
 	}
-	int result = _delete_2(m_string(tableName), size, name, value, opt);
+	int result = rc._delete_2(m_string(tableName), size, name, value, opt);
 	return result;
 
 }
 
 // 有condition的重载
 // 只有一个结果
-table* select_from_api(string tableName, vector<string> attrList, condition opt)
-{
-	m_string attr[15];
-	int columnNum;
-	if (attrList.empty())
-	{
-		attr[0] = m_string("*");
-		columnNum = 1;
-	}
-	else
-	{
-		columnNum = attrList.size();
-		for (int i = 0; i < columnNum; i++)
-		{
-			trim(attrList[i]);
-			strcpy(attr[i].str, attrList[i].c_str());
-		}
-	}
-	record_manager rc;
-	m_string m_tableName(tableName.c_str());
-	m_string optAttr(opt.attr.c_str()); //提取属性
-	char cond = ' ';
-	switch (opt.cond)
-	{
-	case BIG:
-		cond = '>';
-		break;
-	case SMALL:
-		cond = '<';
-		break;
-	case EQUAL:
-		cond = '=';
-		break;
-	case NOTSMALL:
-		cond = 'g';
-		break;
-	case NOTBIG:
-		cond = 'l';
-		break;
-	case NOTEQUAL:
-		cond = '!';
-		break;
-	default:
-		break;
-	}
-	string temp = opt.value;
-	trim(temp);
-	if (temp[0] == '\'' && temp[temp.length() - 1] == '\'')
-	{
-		temp.erase(temp.begin());
-		temp.erase(temp.end() - 1);
-	}
-	else
-	{
-		RemoveTabSpace(temp);
-		if (IsLegalInt(temp) == false && IsLegalFloat(temp) == false)
-		{
-			cerr << "where条件错误：错误的整数或浮点数" << temp << endl;
-			table* errTable = new table;
-			errTable->isError = 2;
-			return errTable;
-		}
-	}
-	m_string value(temp.c_str());
-	// 已经提取属性值
-	// 开始调用函数
-	// 回显表格
-	table* result = rc.select(m_tableName, attr,columnNum, optAttr, value, cond);
-	return result;
-}
-
-// 重载函数：没有条件的单约束情况
-table* select_from_api(string tableName, vector<string> attrList)
-{
-	m_string attr[15];
-	int columnNum;
-	if (attrList.empty())
-	{
-		attr[0] = m_string("*");
-		columnNum = 1;
-	}
-	else
-	{
-		columnNum = attrList.size();
-		for (int i = 0; i < columnNum; i++)
-		{
-			trim(attrList[i]);
-			attr[i] = m_string(attrList[i].c_str());
-		}
-	}
-	record_manager rc;
-	m_string m_tableName(tableName.c_str());
-	table* result = rc.select(m_tableName, attr, columnNum);
-	return result;
-}
-
-// 兼具整合功能
-string select_api(string tableName, vector<string> attrList, vector<condition> options)
-{
-	// 如果没有条件
-	if (options.empty())
-	{
-		table* result  = select_from_api(tableName, attrList);
-		if (result->isError == 1)
-		{
-			cerr << "查询错误：不存在的表名" << endl;
-			return "99";
-		}
-		if (result->row_num == 0)
-		{
-			cerr << "查询成功，但没有匹配的数据" << endl;
-			return "80";
-		}
-		if (attrList.empty())
-		{
-			for (int i = 0; i < result->column_num; i++)
-				cout << result->columns[i].column_name << "\t\t";
-			cout << endl;
-			for (int i = 0; i < result->row_num; i++)
-			{
-				for (int j = 0; j < result->column_num; j++)
-					cout << result->rows[i]->data[j] << "\t\t";
-				cout << endl;
-			}
-			result = NULL;
-		}
-		else
-		{
-			for (int i = 0; i < result->column_num; i++)
-				cout << attrList[i] << "\t\t";
-			cout << endl;
-			for (int i = 0; i < result->row_num; i++)
-			{
-				for (int j = 0; j < result->column_num; j++)
-					cout << result->rows[i]->data[j] << "\t\t";
-				cout << endl;
-			}
-		}
-		
-	}
-	// 需要进行条件弥合
-	else
-	{
-		vector<string> attr;
-		vector<vector<string>> all;
-		all.clear();
-		vector<int> rowNumber;
- 		table* temp = select_from_api(tableName, attrList, options[0]);
-		if (temp->isError == 1)
-		{
-			cerr << "查询错误：不存在的表名" << endl;
-			return "99";
-		}
-		if (temp->isError == 2)
-		{
-			return "99";
-		}
-		// 先把属性名获取了
-		for (int i = 0; i < temp->column_num; i++)
-			attr.push_back(temp->columns[i].column_name.str);
-		vector<vector<string>> ts;
-		for (int k = 0; k < options.size(); k++)
-		{
-			table* result = select_from_api(tableName, attrList, options[k]);
-			if (result->isError == 1)
-			{
-				cerr << "查询错误：不存在的表名" << endl;
-				return "99";
-			}
-			for (int i = 0; i < result->row_num; i++)
-			{
-				vector<string> tv;
-				for (int j = 0; j < result->column_num; j++)
-				{
-					tv.push_back(result->rows[i]->data[j].str);
-				}
-				rowNumber.push_back(result->rows[i]->id);
-				ts.push_back(tv);
-			}
-		}
-		for (int i = 0; i < ts.size(); i++)
-		{
-			if (rowNumber[i] >= 0 && count(rowNumber.begin(), rowNumber.end(), rowNumber[i]) >= options.size())
-			{
-				all.push_back(ts[i]);
-				for (int j = i; j < ts.size(); j++)
-				{
-					if (rowNumber[j] == rowNumber[i])
-					{
-						rowNumber[j] = -1; //无效
-					}
-				}
-			}
-		}
-		// 交集结束
-		if (all.empty())
-		{
-			cout << "查询成功，但无匹配数据" << endl;
-			return "80";
-		}
-		for (int i = 0; i < attr.size(); i++)
-			cout << attr[i] << "\t\t";
-		cout << endl;
-		for (int i = 0; i < all.size(); i++)
-		{
-			for (int j = 0; j < all[i].size(); j++)
-				cout << all[i][j] << "\t\t";
-			cout << endl;
-		}
-		cout << "查询成功,共" <<all.size()<< "行" << endl;
-		return "80";
-	}
-
-	return "80";
-}
+//table* select_from_api(string tableName, vector<string> attrList, condition opt)
+//{
+//	m_string attr[15];
+//	int columnNum;
+//	if (attrList.empty())
+//	{
+//		attr[0] = m_string("*");
+//		columnNum = 1;
+//	}
+//	else
+//	{
+//		columnNum = attrList.size();
+//		for (int i = 0; i < columnNum; i++)
+//		{
+//			trim(attrList[i]);
+//			strcpy(attr[i].str, attrList[i].c_str());
+//		}
+//	}
+//	record_manager rc;
+//	m_string m_tableName(tableName.c_str());
+//	m_string optAttr(opt.attr.c_str()); //提取属性
+//	char cond = ' ';
+//	switch (opt.cond)
+//	{
+//	case BIG:
+//		cond = '>';
+//		break;
+//	case SMALL:
+//		cond = '<';
+//		break;
+//	case EQUAL:
+//		cond = '=';
+//		break;
+//	case NOTSMALL:
+//		cond = 'g';
+//		break;
+//	case NOTBIG:
+//		cond = 'l';
+//		break;
+//	case NOTEQUAL:
+//		cond = '!';
+//		break;
+//	default:
+//		break;
+//	}
+//	string temp = opt.value;
+//	trim(temp);
+//	if (temp[0] == '\'' && temp[temp.length() - 1] == '\'')
+//	{
+//		temp.erase(temp.begin());
+//		temp.erase(temp.end() - 1);
+//	}
+//	else
+//	{
+//		RemoveTabSpace(temp);
+//		if (IsLegalInt(temp) == false && IsLegalFloat(temp) == false)
+//		{
+//			cerr << "where条件错误：错误的整数或浮点数" << temp << endl;
+//			table* errTable = new table;
+//			errTable->isError = 2;
+//			return errTable;
+//		}
+//	}
+//	m_string value(temp.c_str());
+//	// 已经提取属性值
+//	// 开始调用函数
+//	// 回显表格
+//	table* result = rc.select(m_tableName, attr,columnNum, optAttr, value, cond);
+//	return result;
+//}
+//
+//// 重载函数：没有条件的单约束情况
+//table* select_from_api(string tableName, vector<string> attrList)
+//{
+//	m_string attr[15];
+//	int columnNum;
+//	if (attrList.empty())
+//	{
+//		attr[0] = m_string("*");
+//		columnNum = 1;
+//	}
+//	else
+//	{
+//		columnNum = attrList.size();
+//		for (int i = 0; i < columnNum; i++)
+//		{
+//			trim(attrList[i]);
+//			attr[i] = m_string(attrList[i].c_str());
+//		}
+//	}
+//	record_manager rc;
+//	m_string m_tableName(tableName.c_str());
+//	table* result = rc.select(m_tableName, attr, columnNum);
+//	return result;
+//}
+//
+//// 兼具整合功能
+//string select_api(string tableName, vector<string> attrList, vector<condition> options)
+//{
+//	// 如果没有条件
+//	if (options.empty())
+//	{
+//		table* result  = select_from_api(tableName, attrList);
+//		if (result->isError == 1)
+//		{
+//			cerr << "查询错误：不存在的表名" << endl;
+//			return "99";
+//		}
+//		if (result->row_num == 0)
+//		{
+//			cerr << "查询成功，但没有匹配的数据" << endl;
+//			return "80";
+//		}
+//		if (attrList.empty())
+//		{
+//			for (int i = 0; i < result->column_num; i++)
+//				cout << result->columns[i].column_name << "\t\t";
+//			cout << endl;
+//			for (int i = 0; i < result->row_num; i++)
+//			{
+//				for (int j = 0; j < result->column_num; j++)
+//					cout << result->rows[i]->data[j] << "\t\t";
+//				cout << endl;
+//			}
+//			result = NULL;
+//		}
+//		else
+//		{
+//			for (int i = 0; i < result->column_num; i++)
+//				cout << attrList[i] << "\t\t";
+//			cout << endl;
+//			for (int i = 0; i < result->row_num; i++)
+//			{
+//				for (int j = 0; j < result->column_num; j++)
+//					cout << result->rows[i]->data[j] << "\t\t";
+//				cout << endl;
+//			}
+//		}
+//		
+//	}
+//	// 需要进行条件弥合
+//	else
+//	{
+//		vector<string> attr;
+//		vector<vector<string>> all;
+//		all.clear();
+//		vector<int> rowNumber;
+// 		table* temp = select_from_api(tableName, attrList, options[0]);
+//		if (temp->isError == 1)
+//		{
+//			cerr << "查询错误：不存在的表名" << endl;
+//			return "99";
+//		}
+//		if (temp->isError == 2)
+//		{
+//			return "99";
+//		}
+//		// 先把属性名获取了
+//		for (int i = 0; i < temp->column_num; i++)
+//			attr.push_back(temp->columns[i].column_name.str);
+//		vector<vector<string>> ts;
+//		for (int k = 0; k < options.size(); k++)
+//		{
+//			table* result = select_from_api(tableName, attrList, options[k]);
+//			if (result->isError == 1)
+//			{
+//				cerr << "查询错误：不存在的表名" << endl;
+//				return "99";
+//			}
+//			for (int i = 0; i < result->row_num; i++)
+//			{
+//				vector<string> tv;
+//				for (int j = 0; j < result->column_num; j++)
+//				{
+//					tv.push_back(result->rows[i]->data[j].str);
+//				}
+//				rowNumber.push_back(result->rows[i]->id);
+//				ts.push_back(tv);
+//			}
+//		}
+//		for (int i = 0; i < ts.size(); i++)
+//		{
+//			if (rowNumber[i] >= 0 && count(rowNumber.begin(), rowNumber.end(), rowNumber[i]) >= options.size())
+//			{
+//				all.push_back(ts[i]);
+//				for (int j = i; j < ts.size(); j++)
+//				{
+//					if (rowNumber[j] == rowNumber[i])
+//					{
+//						rowNumber[j] = -1; //无效
+//					}
+//				}
+//			}
+//		}
+//		// 交集结束
+//		if (all.empty())
+//		{
+//			cout << "查询成功，但无匹配数据" << endl;
+//			return "80";
+//		}
+//		for (int i = 0; i < attr.size(); i++)
+//			cout << attr[i] << "\t\t";
+//		cout << endl;
+//		for (int i = 0; i < all.size(); i++)
+//		{
+//			for (int j = 0; j < all[i].size(); j++)
+//				cout << all[i][j] << "\t\t";
+//			cout << endl;
+//		}
+//		cout << "查询成功,共" <<all.size()<< "行" << endl;
+//		return "80";
+//	}
+//
+//	return "80";
+//}
 
 string new_select_api(string tableName, vector<string> attrList, vector<condition> options)
 {
