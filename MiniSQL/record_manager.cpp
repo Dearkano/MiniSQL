@@ -858,6 +858,7 @@ int record_manager::_delete_2(m_string tableName, int opt_num, m_string column_n
 
 	temp_row tr1 = this->select_row(tb->table_name, column_name[0], value[0], opt[0]);
 	temp_row *tr = new temp_row();
+	tr = &tr1;
 	for (int i = 1; i < opt_num; i++) {
 		temp_row tr2 = this->select_row(tb->table_name, column_name[i], value[i], opt[i]);
 		*tr = mix(tr1, tr2);
@@ -883,10 +884,11 @@ int record_manager::_delete_2(m_string tableName, int opt_num, m_string column_n
 			newData[p++] = data[i];
 		}
 	}
+	int pk = this->dict.db->tables[t]->row_num - p;
 	b.update_table(tb->table_name, newData, p, tb->column_num);
 	this->dict.db->tables[t]->row_num = p;
 	this->dict.update_database();
-	return p;
+	return pk;
 }
 table* record_manager::select_2(m_string tableName, int opt_num, m_string column_name[], m_string value[], char opt[], m_string res_name[], int col_num)
 {
