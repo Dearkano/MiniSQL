@@ -634,6 +634,7 @@ string create_index_api(string tableName, string attr, string indexName)
 			break;
 		}
 		int i;
+		db = new database();
 		for (i = 0; i < db->tables[flag]->column_num; i++)
 		{
 			if (db->tables[flag]->columns[i].column_name.str == attr)

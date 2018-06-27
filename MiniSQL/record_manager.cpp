@@ -968,6 +968,10 @@ table* record_manager::select_2(m_string tableName, int opt_num, m_string column
 			}
 		}
 	}
+	delete data;
+	delete tr;
+	delete data1;
+	delete tb;
 	return _table;
 }
 int record_manager::update(m_string tableName, m_string column1, m_string value1, m_string column2, m_string value2, char opt)
