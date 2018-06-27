@@ -10,8 +10,8 @@ row::row(m_string * data,int col_num)
 {
 	this->data = new m_string[col_num];
 	for (int i = 0; i < col_num; i++) {
-		m_string *s = new m_string(data[i]);
-		this->data[i++] = *s;
+		m_string s = data[i];
+		this->data[i] = s;
 	}
 	//this->data = data;
 }

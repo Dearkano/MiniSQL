@@ -872,7 +872,7 @@ table* record_manager::select_2(m_string tableName, int opt_num, m_string column
 	temp_row *tr = new temp_row();
 	if (opt_num != 0) {
 		temp_row tr1 = this->select_row(tb->table_name, column_name[0], value[0], opt[0]);
-		
+		*tr = tr1;
 		for (int i = 1; i < opt_num; i++) {
 			temp_row tr2 = this->select_row(tb->table_name, column_name[i], value[i], opt[i]);
 			*tr = mix(tr1, tr2);
