@@ -728,4 +728,76 @@ string drop_index_api(string indexName)
 		return "80";
 	}
 }
+int update_api(string tableName, string attrName, string value, vector<condition> options)
+{
+	m_string name(tableName);
+	m_string attr(attrName);
+	data_dictionary dt;
+	record_manager rc;
+	database *db = dt.db;
+	int find = -1;
+	for (int i = 0; i < db->tableNum; i++)
+	{
+		if (db->tables[i]->table_name == name)
+		{
+			find = i;
+			break;
+		}
+	}
+	if (find < 0) // 没有找到对应的表
+	{
+		return -1;
+	}
+	int find2 = -1;
+	for (int i = 0; i < db->tables[find]->column_num; i++)
+	{
+		if (db->tables[find]->columns[i].column_name == attr)
+		{
+			find2 = i;
+			break;
+		}
+	}
+	if (find2 < 0)
+	{
+		return -2;
+	}
+	m_string type = db->tables[find]->columns[find2].data_type;
+	if (type == m_string("char"))
+	{
+		trim(value);
+		if (value[0] != '\'' || value[value.length() - 1] != '\'')
+		{
+			cerr << "update error: invalid char type" << endl;
+			return -3;
+		}
+		value.erase(value.begin());
+		value.erase(value.end() - 1);
+		int length = db->tables[find]->columns[find2].data_size;
+		if (length > 0 && length < value.length())
+		{
+			cerr << "update error: char too long" << endl;
+			return -3;
+		}
+	}
+	else if (type == m_string("int"))
+	{
+		trim(value);
+		if (!IsLegalInt(value))
+		{
+			cerr << "update error: illegal int" << endl;
+			return -3;
+		}
+	}
+	else if (type == m_string("float"))
+	{
+		trim(value);
+		if (!IsLegalFloat(value))
+		{
+			cerr << "update error: illegal float" << endl;
+			return -3;
+		}
+	}
+	m_string var = m_string(value);
+	
 
+}
