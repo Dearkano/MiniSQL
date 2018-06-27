@@ -383,7 +383,7 @@ temp_row record_manager::select_row(m_string tableName, m_string column, m_strin
 
 	int c = -1;
 	int count = 0;
-	int *res = new int[1000];
+	int *res = new int[15000];
 	if (opt == ' ') {
 		for (int i = 0; i < tb->row_num; i++)
 			res[i] = i;
