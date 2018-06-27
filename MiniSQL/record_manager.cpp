@@ -409,7 +409,7 @@ temp_row record_manager::select_row(m_string tableName, m_string column, m_strin
 	if (strcmp("int", tb->columns[c].data_type.str) == 0) {
 		isInt = 1;
 	}
-	if (isFloat == 0) {
+	if (isFloat == 0&&isInt==0) {
 		for (int i = 0; i < tb->row_num; i++) {
 			switch (opt) {
 			case '=':
