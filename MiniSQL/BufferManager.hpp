@@ -26,7 +26,7 @@ typedef struct fileInfo FileInfo;
 
 FileInfo *DB;
 
-FileInfo *get_file_info(const string DB_Name, const string fileName, const int m_fileType);
+FileInfo *get_file_info(const string DB_Namea, const string fileName, const int m_fileType);
 BlockInfo *get_block_inbuffer(const FileInfo *file_temp, const int blockNum);
 BlockInfo *remove_block_inbuffer(BlockInfo *m_blockInfo);
 BlockInfo *findBlock(string DB_Name);

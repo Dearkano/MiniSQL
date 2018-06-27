@@ -118,9 +118,6 @@ BPTree<T>::BPTree(std::string &name):
     min_key_num = (degree - 1) / 2;
     // Initialize the keys.
     initialize();
-
-    load_all_node();
-
 }
 
 
@@ -556,6 +553,10 @@ std::vector<offset> BPTree<T>::search_between(const T &begin_key, const T &end_k
     results.erase(unique(results.begin(), results.end()), results.end());
     return results;
 }
+template<class T>
+int BPTree<T>::count_block_num(const std::string &index_name) {
+	return 0;
+}
 
 template<class T>
 std::vector<offset> BPTree<T>::search_smaller(const T &end_key) {
@@ -629,23 +630,16 @@ void BPTree<T>::get_file(const std::string &file_name) {
 
 template<class T>
 void BPTree<T>::load_from_disk(char *p, char *end) {
-    //TODO: load B+ tree from disk
 }
 
 template<class T>
 void BPTree<T>::dump_to_disk() {
-    // TODO: dump B+ tree to disk
 }
 
-template<class T>
-int BPTree<T>::count_block_num(const std::string &index_name) {
-    // TODO: get block number:
-    return 0;
-}
 
 template<class T>
 void BPTree<T>::load_all_node() {
-    //TODO: load from disk
+	;
 }
 
 

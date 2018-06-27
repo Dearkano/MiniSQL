@@ -52,7 +52,9 @@ int real_buffer_manager::update_table(m_string tableName, m_string ** data, int 
 			fwrite(data[i][j].str, sizeof(char), 256, fp);
 		}		
 	}
-
+	for (int i = 0; i < rowNum; i++) {
+		delete data[i];
+	}
 	fclose(fp);
 	return 0;
 }
