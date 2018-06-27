@@ -91,6 +91,7 @@ vector<condition> WhereSplit(string input);
 bool IsLegalInt(string a);
 bool IsLegalFloat(string a);
 bool isLegalName(string a);
+string UpdateTable(string sql);
 
 
 # endif

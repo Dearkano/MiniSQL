@@ -2,10 +2,14 @@
 #include"record_manager.h"
 #include"catalog_manager.h"
 #include"table.h"
+
 using namespace std;
 
-int main()
+
+
+int main(int argc, char* argv[])
 {
+
 	int md = 0;
 	if (md != 1) {
 		int mode;
@@ -47,12 +51,12 @@ int main()
 		return 0;
 	}
 	else {
-		record_manager r;
-		for (int i = 0; i < 100; i++) {
-			r.select_2(m_string("t1"));
-			cout << i << endl;
-		}
-	
+		/*Py_SetProgramName(argv[0]);
+		Py_Initialize();
+		PyRun_SimpleString("print 'Hello Python!'\n");
+		Py_Finalize();
+		getchar();
+		return 0;*/
 	}
 }
 
@@ -68,3 +72,5 @@ int main()
 //	d.listTable();
 //	system("pause");
 //}
+
+

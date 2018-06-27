@@ -16,5 +16,6 @@ string create_index_api(string tableName, string attr, string indexName);
 string drop_index_api(string indexName);
 string new_select_api(string tableName, vector<string> attrList, vector<condition> options);
 int multi_delete(string tableName, vector<condition> option);
+int update_api(string tableName, string attrName, string value, vector<condition> options);
 
 #endif // !_API_H_

@@ -20,7 +20,7 @@ int create_table_api(InterTable newTable)
 	iter = newTable.attrList.begin();
 	// 输出所有信息
 	m_string tableName(newTable.tableName);
-	for(int i = 0; i < order.size(); i++)
+	for (int i = 0; i < order.size(); i++)
 	{
 		string attr = order[i];
 		m_string attrName(attr.c_str());
@@ -62,17 +62,27 @@ int insert_into_api(vector<string> valueList, string tableName)
 	}
 	if (flag != -1)
 	{
-		if (valueList.size() != db->tables[flag]->column_num)
+		try
 		{
-			cerr << "value错误：参数列表长度不一致"  << endl;
-			return -1;
+			if (valueList.size() != db->tables[flag]->column_num)
+			{
+				cout << "value错误：参数列表长度不一致" << endl;
+				return -1;
+			}
+		}
+		catch (...)
+		{
+			cout << "错误1" << endl;
+
 		}
 		m_string value[15];
+		m_string type;
 		int ptr = 0;
+
 		for (int i = 0; i < db->tables[flag]->column_num; i++)
 		{
-			m_string type = db->tables[flag]->columns[i].data_type;
-			if (strcmp (type.str, "char") == 0)
+			type = db->tables[flag]->columns[i].data_type;
+			if (strcmp(type.str, "char") == 0)
 			{
 				trim(valueList[i]);
 				if (valueList[i][0] != '\'' || valueList[i][valueList[i].length() - 1] != '\'')
@@ -85,7 +95,7 @@ int insert_into_api(vector<string> valueList, string tableName)
 				valueList[i].erase(valueList[i].end() - 1);
 				if (valueList[i].length() > size)
 				{
-					cerr << "value错误：参数" + valueList[i] + "类型错误：char字符串长度超过限制" <<endl;
+					cerr << "value错误：参数" + valueList[i] + "类型错误：char字符串长度超过限制" << endl;
 					return -1;
 				}
 				m_string str(valueList[i].c_str());
@@ -114,8 +124,17 @@ int insert_into_api(vector<string> valueList, string tableName)
 				value[ptr++] = _float;
 			}
 		}
-		m_string m_tableName(tableName.c_str());
-		int result = rc.add(m_tableName, value);
+		m_string m_tableName;
+		int result;
+		try
+		{
+			m_tableName = tableName.c_str();
+			result = rc.add(m_tableName, value);
+		}
+		catch (...)
+		{
+			cout << "错误2" << endl;
+		}
 		if (result == -1)
 		{
 			cerr << "value错误：查无此表" << endl;
@@ -123,7 +142,7 @@ int insert_into_api(vector<string> valueList, string tableName)
 		}
 		else
 		{
-			if(result == 1)
+			if (result == 1)
 				cerr << "value错误：主键或unique冲突" << endl;
 			return result;
 		}
@@ -148,26 +167,26 @@ int delete_from_api(string tableName, vector<condition> option)
 	char cond = ' ';
 	switch (opt.cond)
 	{
-		case BIG:
-			cond = '>';
-			break;
-		case SMALL:
-			cond = '<';
-			break;
-		case EQUAL:
-			cond = '=';
-			break;
-		case NOTSMALL:
-			cond = 'g';
-			break;
-		case NOTBIG:
-			cond = 'l';
-			break;
-		case NOTEQUAL:
-			cond = '!';
-			break;
-		default:
-			break;
+	case BIG:
+		cond = '>';
+		break;
+	case SMALL:
+		cond = '<';
+		break;
+	case EQUAL:
+		cond = '=';
+		break;
+	case NOTSMALL:
+		cond = 'g';
+		break;
+	case NOTBIG:
+		cond = 'l';
+		break;
+	case NOTEQUAL:
+		cond = '!';
+		break;
+	default:
+		break;
 	}
 	string temp = opt.value;
 	trim(temp);
@@ -525,6 +544,7 @@ string new_select_api(string tableName, vector<string> attrList, vector<conditio
 			{
 				for (int i = 0; i < opt_num; i++)
 				{
+					trim(options[i].attr);
 					column_name[i] = m_string(options[i].attr);
 					value[i] = m_string(options[i].value);
 					char cond;
@@ -553,7 +573,7 @@ string new_select_api(string tableName, vector<string> attrList, vector<conditio
 					}
 					opt[i] = cond;
 				}
-				result = rc.select_2(m_string(tableName), opt_num, column_name, value, opt,res_name,searchAttr);
+				result = rc.select_2(m_string(tableName), opt_num, column_name, value, opt, res_name, searchAttr);
 			}
 		}
 	}
@@ -587,7 +607,7 @@ int drop_table_api(string tableName)
 
 string create_index_api(string tableName, string attr, string indexName)
 {
-	
+
 	data_dictionary dt;
 	database *db = dt.db;
 	int flag = -1;
@@ -614,7 +634,7 @@ string create_index_api(string tableName, string attr, string indexName)
 			cerr << "创建索引错误：列名不合法" << endl;
 			return "99";
 		}
-		int result = dt.add_index(m_string(tableName),m_string(attr), m_string(indexName));
+		int result = dt.add_index(m_string(tableName), m_string(attr), m_string(indexName));
 		switch (result)
 		{
 		case 0:
@@ -642,7 +662,7 @@ string create_index_api(string tableName, string attr, string indexName)
 				type = db->tables[flag]->columns[i].data_type.str;
 				break;
 			}
-		}
+	}
 		/*if (i >= db->tables[flag]->column_num)
 		{
 			cerr << "创建索引错误：无此属性" << endl;
@@ -670,8 +690,8 @@ string create_index_api(string tableName, string attr, string indexName)
 				cerr << e.what() << endl;
 #endif // DEBUG
 
-			}
 		}
+}
 		else if (type == "float")
 		{
 			try {
@@ -705,17 +725,17 @@ string drop_index_api(string indexName)
 	int result = dc.delete_index(m_string(indexName));
 	switch (result)
 	{
-		case 0:
-			break;
-		case 1:
-			cout << "drop index error: no such table" << endl;
-			return "99";
-		case 2:
-			cout << "drop index error: no such index" << endl;
-			return "99";
-		default:
-			return "99";
-			break;
+	case 0:
+		break;
+	case 1:
+		cout << "drop index error: no such table" << endl;
+		return "99";
+	case 2:
+		cout << "drop index error: no such index" << endl;
+		return "99";
+	default:
+		return "99";
+		break;
 	}
 	try {
 		im.drop_index(indexName);
@@ -728,4 +748,119 @@ string drop_index_api(string indexName)
 		return "80";
 	}
 }
-
+int update_api(string tableName, string attrName, string value, vector<condition> options)
+{
+	if (options.empty())
+	{
+		cerr << "must provide where" << endl;
+		return -3;
+	}
+	m_string name(tableName);
+	m_string attr(attrName);
+	data_dictionary dt;
+	record_manager rc;
+	database *db = dt.db;
+	int find = -1;
+	for (int i = 0; i < db->tableNum; i++)
+	{
+		if (db->tables[i]->table_name == name)
+		{
+			find = i;
+			break;
+		}
+	}
+	if (find < 0) // 没有找到对应的表
+	{
+		return 1;
+	}
+	int find2 = -1;
+	for (int i = 0; i < db->tables[find]->column_num; i++)
+	{
+		if (db->tables[find]->columns[i].column_name == attr)
+		{
+			find2 = i;
+			break;
+		}
+	}
+	if (find2 < 0)
+	{
+		cerr << "no such attribute" << endl;
+		return -2;
+	}
+	m_string type = db->tables[find]->columns[find2].data_type;
+	if (type == m_string("char"))
+	{
+		trim(value);
+		if (value[0] != '\'' || value[value.length() - 1] != '\'')
+		{
+			cerr << "update error: invalid char type" << endl;
+			return -3;
+		}
+		value.erase(value.begin());
+		value.erase(value.end() - 1);
+		int length = db->tables[find]->columns[find2].data_size;
+		if (length > 0 && length < value.length())
+		{
+			cerr << "update error: char too long" << endl;
+			return -3;
+		}
+	}
+	else if (type == m_string("int"))
+	{
+		trim(value);
+		if (!IsLegalInt(value))
+		{
+			cerr << "update error: illegal int" << endl;
+			return -3;
+		}
+	}
+	else if (type == m_string("float"))
+	{
+		trim(value);
+		if (!IsLegalFloat(value))
+		{
+			cerr << "update error: illegal float" << endl;
+			return -3;
+		}
+	}
+	m_string var = m_string(value);
+	//  开始调用接口
+	/*int update(m_string tableName, int opt_num, m_string column1, m_string value1, m_string *column2, m_string* value2, char *opt);*/
+	m_string column2[50];
+	m_string value2[50];
+	char opt[50];
+	for (int i = 0; i < options.size(); i++)
+	{
+		trim(options[i].attr);
+		column2[i] = m_string(options[i].attr);
+		value2[i] = m_string(value);
+		char cond = ' ';
+		switch (options[i].cond)
+		{
+		case BIG:
+			cond = '>';
+			break;
+		case SMALL:
+			cond = '<';
+			break;
+		case EQUAL:
+			cond = '=';
+			break;
+		case NOTSMALL:
+			cond = 'g';
+			break;
+		case NOTBIG:
+			cond = 'l';
+			break;
+		case NOTEQUAL:
+			cond = '!';
+			break;
+		default:
+			break;
+		}
+		opt[i] = cond;
+	}
+	/*int update(m_string tableName, int opt_num, m_string column1, m_string value1, m_string *column2, m_string* value2, char *opt);*/
+	int result = rc.update(name, options.size(), attr, var, column2, value2, opt);
+	return result;
+}

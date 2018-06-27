@@ -32,7 +32,14 @@ bool IsLegalInt(string a)
 	}
 	for (int i = 0; i < a.length(); i++)
 	{
-		if (!(a[i] >= '0' && a[i] <= '9'))
+		if (a[i] == '-')
+		{
+			if (i == 0)
+				continue;
+			else
+				return false;
+		}
+		else if (!(a[i] >= '0' && a[i] <= '9'))
 		{
 			return false;
 		}
@@ -50,6 +57,13 @@ bool IsLegalFloat(string a)
 	}
 	for (int i = 0; i < a.length(); i++)
 	{
+		if (a[i] == '-')
+		{
+			if (i == 0)
+				continue;
+			else
+				return false;
+		}
 		if (!(a[i] >= '0' && a[i] <= '9') && (a[i] != '.'))
 		{
 			return false;
@@ -254,6 +268,8 @@ string Interpreter(string statement)
 		sql = Delete(sql);
 	else if (temp == "execfile")
 		sql = ExecFile(sql);
+	else if (temp == "update")
+		sql = UpdateTable(sql);
 	// 如果是非法语句
 	else
 	{
@@ -975,6 +991,7 @@ string Insert(string sql)
 	}
 	catch(...)
 	{
+		cout << "valueSplit" << endl;
 		return "99";
 	}
 	try
@@ -986,11 +1003,13 @@ string Insert(string sql)
 		}
 		else
 		{
+			cout << "insertInto" << endl;
 			return "99";
 		}
 	}
 	catch(...)
 	{
+		cout << "insertIntoError" << endl;
 		return "99";
 	}
 }
@@ -1003,6 +1022,7 @@ string Insert(string sql)
 
 string Select(string sql)
 {
+	if (sql.empty()) return "80";
 	string preSql = sql;
 	// 去除头部的select
 	string mask1 = "select";
@@ -1442,5 +1462,94 @@ string CreateIndex(string sql)
 }
 
 
+void clear()
+{
 
+}
+
+string UpdateTable(string sql)
+{
+	trim(sql);								//	将字符串两端空格去除
+	string formSql = sql;					//	储存原字符串
+	sql = sql.substr(6);					//	去除update，其为6位
+	if (sql[0] != ' ' || sql[0] != '\t')	//	如果update的下字符非空
+	{
+		cerr << "Syntax Error: Invalid table name in update expression" << endl;
+		return "99";
+	}
+	// 此时应当暴露table
+	trim(sql);
+	int find = sql.find("set");
+	if (find == string::npos)
+	{
+		cerr << "Syntax Error: keyword \'set'\ is missed" << endl;
+		return "99";
+	}
+	string tableName = sql.substr(0, find);
+	trim(tableName);
+	if (!isLegalName(tableName))
+	{
+		cerr << "Syntax Error: illegal table name" << endl;
+		return "99";
+	}
+	sql = sql.substr(find + 3);
+	if (sql[0] != ' ' || sql[0] != '\t')	//	如果update的下字符非空
+	{
+		cerr << "Syntax Error: Invalid attribute name in update expression" << endl;
+		return "99";
+	}
+	trim(sql);
+	string setStr;
+	// 下面提取set条件，为此我们需要先找到where
+	int find2 = sql.find("where");
+	// 没有
+	if (find2 == string::npos)
+	{
+		int find3 = sql.find(";");
+		setStr = sql.substr(0, find3);
+		trim(setStr);
+	}
+	else
+	{
+		setStr = sql.substr(0, find2);
+		trim(setStr);
+	}
+	// 处理setstr
+	vector<condition> condList;
+	condList.clear(); // 一开始清空
+	if (find2 != string::npos)
+	{
+		int find4 = find2 + 5;
+		if (find4 >= sql.length() || (sql[find4] != ' ' && sql[find4] != '\t'))
+		{
+			cerr << "Syntax Error: Invalid expression after \'where\'" << endl;
+			return "99";
+		}
+		int find5 = sql.find(";");
+		if (find5 < find4)
+		{
+			cerr << "Syntax Error: Unexpected \';\'" << endl;
+			return "99";
+		}
+		string whereStr = sql.substr(find4, find5 - find4);
+		trim(whereStr);
+		condList = WhereSplit(whereStr); // 获取条件表
+	}
+	vector<string> container;
+	boost::split(container, setStr, is_any_of("="), token_compress_off);
+	if (container.size() != 2)
+	{
+		cerr << "Syntax Error: Unexpected \'=\'" << endl;
+		return "99";
+	}
+	trim(container[0]);
+	trim(container[1]);
+	if (!isLegalName(container[0]))
+	{
+		cerr << "Syntax Error: illgal attribute name" << endl;
+		return "99";
+	}
+	int result = update_api(tableName, container[0], container[1], condList);
+	return "80";
+}
 
