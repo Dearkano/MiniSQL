@@ -5,6 +5,7 @@
 #include <algorithm>
 #include"IndexManager.h"
 #include "catalog_manager.h"
+#include "record_manager.h"
 // #define DEBUG
 IndexManager im;
 
@@ -192,7 +193,49 @@ int delete_from_api(string tableName, vector<condition> option)
 
 int multi_delete(string tableName, vector<condition> option)
 {
-	return 0;
+	trim(tableName);
+	if (option.size() == 0)
+	{
+		int result = _delete_2(m_string(tableName));
+		return result;
+	}
+	int size = option.size();
+	m_string name[15];
+	m_string value[15];
+	char opt[15];
+	for (int i = 0; i < size; i++)
+	{
+		name[i] = m_string(option[i].attr);
+		value[i] = m_string(option[i].value);
+		char cond;
+		switch (option[i].cond)
+		{
+		case BIG:
+			cond = '>';
+			break;
+		case SMALL:
+			cond = '<';
+			break;
+		case EQUAL:
+			cond = '=';
+			break;
+		case NOTSMALL:
+			cond = 'g';
+			break;
+		case NOTBIG:
+			cond = 'l';
+			break;
+		case NOTEQUAL:
+			cond = '!';
+			break;
+		default:
+			break;
+		}
+		opt[i] = cond;
+	}
+	int result = _delete_2(m_string(tableName), size, name, value, opt);
+	return result;
+
 }
 
 // ÓÐconditionµÄÖØÔØ
@@ -521,7 +564,7 @@ string new_select_api(string tableName, vector<string> attrList, vector<conditio
 	else
 	{
 		for (int i = 0; i < result->column_num; i++)
-			cout << attrList[i] << "\t\t";
+			cout << result->columns[i].column_name << "\t\t";
 		cout << endl;
 		for (int i = 0; i < result->row_num; i++)
 		{
