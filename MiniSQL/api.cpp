@@ -521,7 +521,7 @@ string new_select_api(string tableName, vector<string> attrList, vector<conditio
 	else
 	{
 		for (int i = 0; i < result->column_num; i++)
-			cout << attrList[i] << "\t\t";
+			cout << result->columns[i].column_name << "\t\t";
 		cout << endl;
 		for (int i = 0; i < result->row_num; i++)
 		{
