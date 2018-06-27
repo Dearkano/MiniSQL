@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include"m_string.h"
 class row
 {
